@@ -183,6 +183,7 @@ export function resolveNode(run: RunState, nodeId: string, choiceId: string): Ru
       currentEvent: null,
       currentChoice: choice,
       resultMessage: getResultMessage(event, choice, recruitedName),
+      battleContext: null,
     },
   };
 }

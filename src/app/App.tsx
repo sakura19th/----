@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { ScreenFrame } from '../components/layout/ScreenFrame';
+import { BattleScreen } from '../screens/battle/BattleScreen';
 import { EventScreen } from '../screens/event/EventScreen';
 import { MapScreen } from '../screens/map/MapScreen';
 import { RecruitScreen } from '../screens/recruit/RecruitScreen';
@@ -31,6 +32,8 @@ export function App() {
     screen = <EventScreen run={store.run} onChoose={store.chooseEvent} />;
   } else if (store.screen === 'recruit' && store.run) {
     screen = <RecruitScreen run={store.run} onChoose={store.chooseEvent} />;
+  } else if (store.screen === 'battle' && store.run) {
+    screen = <BattleScreen run={store.run} onSubmitAction={store.submitBattleAction} onBackToMap={store.leaveBattleToMap} />;
   }
 
   return <ScreenFrame>{screen}</ScreenFrame>;

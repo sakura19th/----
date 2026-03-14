@@ -36,7 +36,7 @@ export type RunSaveMeta = {
   autoSaveCount: number;
 };
 
-export type RunScreen = 'title' | 'start' | 'map' | 'event' | 'recruit';
+export type RunScreen = 'title' | 'start' | 'map' | 'event' | 'recruit' | 'battle';
 
 export type RunEncounterState = {
   nodeId: Identifier;
@@ -46,6 +46,14 @@ export type RunEncounterState = {
   battleState?: BattleState;
 };
 
+export type RunBattlePresentation = {
+  battleId: Identifier;
+  battleState: BattleState;
+  awaitingUnitId: Identifier | null;
+  selectedSkillId: Identifier | null;
+  selectedTargetIds: readonly Identifier[];
+};
+
 export type RunPresentationState = {
   activeScreen: RunScreen;
   selectedNodeId: Identifier | null;
@@ -53,6 +61,7 @@ export type RunPresentationState = {
   currentEvent: EventTemplate | null;
   currentChoice: EventChoice | null;
   resultMessage: string | null;
+  battleContext: RunBattlePresentation | null;
 };
 
 export type RunState = {

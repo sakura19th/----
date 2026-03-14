@@ -72,7 +72,8 @@ button:disabled {
   backdrop-filter: blur(10px);
 }
 
-.stage1-screen-card {
+.stage1-screen-card,
+.battle-screen-card {
   width: min(100%, 1080px);
 }
 
@@ -140,7 +141,8 @@ button:disabled {
 }
 
 .stage1-panel-grid,
-.stage2-info-grid {
+.stage2-info-grid,
+.battle-layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -184,7 +186,9 @@ button:disabled {
 
 .party-list,
 .map-node-list,
-.stage2-choice-list {
+.stage2-choice-list,
+.battle-unit-list,
+.battle-log-list {
   display: grid;
   gap: 12px;
 }
@@ -212,7 +216,8 @@ button:disabled {
   text-align: left;
 }
 
-.map-node-card--selected {
+.map-node-card--selected,
+.battle-unit-card--active {
   border-color: rgba(169, 183, 255, 0.8);
   box-shadow: 0 0 0 1px rgba(169, 183, 255, 0.25);
 }
@@ -243,10 +248,32 @@ button:disabled {
   border: 1px solid rgba(144, 163, 255, 0.28);
 }
 
+.battle-command-panel,
+.battle-log-panel {
+  grid-column: span 2;
+}
+
+.battle-action-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.battle-target-panel {
+  margin-top: 16px;
+}
+
 @media (max-width: 800px) {
   .stage1-panel-grid,
-  .stage2-info-grid {
+  .stage2-info-grid,
+  .battle-layout {
     grid-template-columns: 1fr;
+  }
+
+  .battle-command-panel,
+  .battle-log-panel {
+    grid-column: auto;
   }
 }
 

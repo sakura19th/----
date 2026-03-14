@@ -208,6 +208,7 @@ function buildReward(state: BattleState): BattleRewardPayload | null {
       .filter((unit) => unit.side === 'party')
       .map((unit) => ({
         unitId: unit.unitId,
+        sourceInstanceId: unit.sourceInstanceId,
         templateId: unit.templateId,
         hp: unit.currentHp,
         maxHp: unit.maxHp,
@@ -316,7 +317,7 @@ function createGuardStatus(actor: BattleUnitState, state: BattleState) {
     isControl: false,
     metadata: {
       actionType: 'guard',
-      mitigationMultiplier: actor.runtime.actionCount,
+      mitigationMultiplier: 0.75,
     },
   };
 }

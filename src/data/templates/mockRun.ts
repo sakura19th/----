@@ -74,6 +74,7 @@ export const MOCK_RUN_STATE: RunState = {
     currentEvent: null,
     currentChoice: null,
     resultMessage: 'Stage1 mock 数据仍保留，供向后兼容展示或验证使用。',
+    battleContext: null,
   },
 };
 

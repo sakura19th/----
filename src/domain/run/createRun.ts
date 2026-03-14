@@ -66,6 +66,7 @@ export function createRun(input: CreateRunInput = {}): RunState {
       currentEvent: null,
       currentChoice: null,
       resultMessage: null,
+      battleContext: null,
     },
   };
 }

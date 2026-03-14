@@ -146,6 +146,7 @@ export type BattleRewardPayload = {
   experience?: number;
   survivors: readonly {
     unitId: Identifier;
+    sourceInstanceId?: Identifier;
     templateId: Identifier;
     hp: number;
     maxHp: number;

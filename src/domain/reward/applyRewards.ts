@@ -23,9 +23,18 @@ function applyBattleSurvivorState(party: readonly PartyMember[], battleReward: B
     return party;
   }
 
-  const survivorMap = new Map(battleReward.survivors.map((survivor) => [survivor.templateId, survivor]));
+  const survivorByInstanceId = new Map(
+    battleReward.survivors
+      .filter((survivor): survivor is typeof survivor & { sourceInstanceId: string } => Boolean(survivor.sourceInstanceId))
+      .map((survivor) => [survivor.sourceInstanceId, survivor]),
+  );
+  const survivorByUnitId = new Map(battleReward.survivors.map((survivor) => [survivor.unitId, survivor]));
+  const survivorByTemplateId = new Map(battleReward.survivors.map((survivor) => [survivor.templateId, survivor]));
+
   return party.map((member) => {
-    const survivor = survivorMap.get(member.identity.id);
+    const survivor = survivorByInstanceId.get(member.instanceId)
+      ?? survivorByUnitId.get(member.instanceId)
+      ?? survivorByTemplateId.get(member.identity.id);
     if (!survivor) {
       return member;
     }

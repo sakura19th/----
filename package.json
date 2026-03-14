@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node ./scripts/postbuild-inline-html.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:stage2": "npx tsx ./src/tests/run/stage2RunSmokeTest.ts",
+    "test:stage4": "npx tsx ./src/tests/run/stage4BattleSmokeTest.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
