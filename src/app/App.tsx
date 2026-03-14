@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ScreenFrame } from '../components/layout/ScreenFrame';
+import { MOCK_ENCOUNTER_PREVIEW, MOCK_RUN_STATE } from '../data/templates/mockRun';
 import { StartScreen } from '../screens/start/StartScreen';
 import { TitleScreen } from '../screens/title/TitleScreen';
 
@@ -11,7 +12,13 @@ export function App() {
   const screen = useMemo(() => {
     switch (currentScreen) {
       case 'start':
-        return <StartScreen onBackToTitle={() => setCurrentScreen('title')} />;
+        return (
+          <StartScreen
+            run={MOCK_RUN_STATE}
+            encounterNames={MOCK_ENCOUNTER_PREVIEW.map((enemy) => enemy.identity.name)}
+            onBackToTitle={() => setCurrentScreen('title')}
+          />
+        );
       case 'title':
       default:
         return <TitleScreen onStart={() => setCurrentScreen('start')} />;

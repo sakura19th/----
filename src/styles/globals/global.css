@@ -67,6 +67,10 @@ button {
   backdrop-filter: blur(10px);
 }
 
+.stage1-screen-card {
+  width: min(100%, 1080px);
+}
+
 .screen-card__eyebrow {
   display: inline-block;
   margin-bottom: 12px;
@@ -128,6 +132,95 @@ button {
 .secondary-button:focus-visible {
   outline: 2px solid #d6deff;
   outline-offset: 2px;
+}
+
+.stage1-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.data-panel {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.data-panel__title {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.kv-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.kv-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kv-list dt {
+  color: rgba(244, 247, 251, 0.68);
+}
+
+.kv-list dd {
+  margin: 0;
+  text-align: right;
+}
+
+.party-list,
+.map-node-list {
+  display: grid;
+  gap: 12px;
+}
+
+.data-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(5, 8, 22, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.data-card strong {
+  font-size: 16px;
+}
+
+.data-card span {
+  color: rgba(244, 247, 251, 0.78);
+  font-size: 14px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(144, 163, 255, 0.14);
+  color: #dce3ff;
+  border: 1px solid rgba(144, 163, 255, 0.28);
+}
+
+@media (max-width: 800px) {
+  .stage1-panel-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
