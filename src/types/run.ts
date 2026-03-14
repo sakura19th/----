@@ -1,14 +1,16 @@
 import type { BattleTemplate } from './battle';
 import type { PartyMember } from './character';
-import type { EventTemplate, EventNodeKind } from './event';
+import type { EventChoice, EventNodeKind, EventTemplate } from './event';
 import type { GameSnapshot, Identifier } from './game';
+
+export type RunNodeStatus = 'locked' | 'available' | 'resolved';
 
 export type RunNode = {
   id: Identifier;
   index: number;
   nodeType: EventNodeKind;
   refId: Identifier;
-  completed: boolean;
+  status: RunNodeStatus;
 };
 
 export type RunMap = {
@@ -21,6 +23,36 @@ export type RunResources = {
   supply: number;
 };
 
+export type ResolvedNodeResult = {
+  nodeId: Identifier;
+  choiceId: Identifier;
+  summary: string;
+};
+
+export type RunSaveMeta = {
+  slotId: string;
+  lastSavedAt: string | null;
+  autoSaveCount: number;
+};
+
+export type RunScreen = 'title' | 'start' | 'map' | 'event' | 'recruit';
+
+export type RunEncounterState = {
+  nodeId: Identifier;
+  eventId: Identifier;
+  battleId?: Identifier;
+  recruitId?: Identifier;
+};
+
+export type RunPresentationState = {
+  activeScreen: RunScreen;
+  selectedNodeId: Identifier | null;
+  pendingEncounter: RunEncounterState | null;
+  currentEvent: EventTemplate | null;
+  currentChoice: EventChoice | null;
+  resultMessage: string | null;
+};
+
 export type RunState = {
   snapshot: GameSnapshot;
   leader: PartyMember;
@@ -30,4 +62,7 @@ export type RunState = {
   resources: RunResources;
   availableEvents: readonly EventTemplate[];
   availableBattles: readonly BattleTemplate[];
+  completedNodeResults: readonly ResolvedNodeResult[];
+  save: RunSaveMeta;
+  presentation: RunPresentationState;
 };

@@ -1,0 +1,80 @@
+import { BATTLE_TEMPLATES, EVENT_TEMPLATES, HERO_ARCHETYPES, RECRUIT_ARCHETYPES } from '../../data';
+import type { CharacterTemplate, PartyMember, RunState } from '../../types';
+import { generateMap } from './generateMap';
+
+export type CreateRunInput = {
+  heroId?: string;
+  seed?: string;
+};
+
+function toPartyMember(template: CharacterTemplate, index: number): PartyMember {
+  return {
+    ...template,
+    instanceId: `${template.identity.id}-run-${index + 1}`,
+    progression: {
+      level: 1,
+      xp: 0,
+      growthBias: {
+        value: 'attack',
+        weight: 1,
+      },
+    },
+    currentRelationToLeader: index === 0 ? 'support' : 'neutral',
+    activeStatusEffects: [],
+  };
+}
+
+function buildSeed(seed?: string) {
+  return seed ?? `RUN-${Date.now()}`;
+}
+
+export function createRun(input: CreateRunInput = {}): RunState {
+  const leaderTemplate = HERO_ARCHETYPES.find((hero) => hero.identity.id === input.heroId) ?? HERO_ARCHETYPES[0];
+  const leader = toPartyMember(leaderTemplate, 0);
+  const map = generateMap();
+  const firstNode = map.nodes.find((node) => node.status === 'available') ?? map.nodes[0];
+
+  return {
+    snapshot: {
+      stage: 'stage2',
+      version: '0.2.0-stage2',
+      seed: {
+        runSeed: buildSeed(input.seed),
+        worldShard: '碎片世界-北境回廊',
+      },
+    },
+    leader,
+    party: [leader],
+    map,
+    currentNodeId: firstNode.id,
+    resources: {
+      shards: 20,
+      supply: 3,
+    },
+    availableEvents: EVENT_TEMPLATES,
+    availableBattles: BATTLE_TEMPLATES,
+    completedNodeResults: [],
+    save: {
+      slotId: 'autosave-stage2',
+      lastSavedAt: null,
+      autoSaveCount: 0,
+    },
+    presentation: {
+      activeScreen: 'map',
+      selectedNodeId: firstNode.id,
+      pendingEncounter: null,
+      currentEvent: null,
+      currentChoice: null,
+      resultMessage: null,
+    },
+  };
+}
+
+export function buildRecruitMember(archetypeId: string, currentPartySize: number): PartyMember | null {
+  const template = RECRUIT_ARCHETYPES.find((candidate) => candidate.identity.id === archetypeId);
+  if (!template) {
+    return null;
+  }
+
+  return toPartyMember(template, currentPartySize);
+}

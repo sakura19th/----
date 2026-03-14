@@ -5,9 +5,9 @@ import {
   HERO_ARCHETYPES,
   RECRUIT_ARCHETYPES,
 } from '..';
-import type { PartyMember, RunState } from '../../types';
+import type { CharacterTemplate, PartyMember, RunState } from '../../types';
 
-function toPartyMember(template: (typeof HERO_ARCHETYPES | typeof RECRUIT_ARCHETYPES)[number], index: number): PartyMember {
+function toPartyMember(template: CharacterTemplate, index: number): PartyMember {
   return {
     ...template,
     instanceId: `${template.identity.id}-instance-${index + 1}`,
@@ -42,10 +42,10 @@ export const MOCK_RUN_STATE: RunState = {
   map: {
     chapter: 1,
     nodes: [
-      { id: 'node-1', index: 1, nodeType: 'story', refId: 'event-broken-caravan', completed: true },
-      { id: 'node-2', index: 2, nodeType: 'battle', refId: 'event-raider-trail', completed: false },
-      { id: 'node-3', index: 3, nodeType: 'camp', refId: 'event-quiet-campfire', completed: false },
-      { id: 'node-4', index: 4, nodeType: 'boss', refId: 'event-fallen-observatory', completed: false },
+      { id: 'node-1', index: 1, nodeType: 'story', refId: 'event-broken-caravan', status: 'resolved' },
+      { id: 'node-2', index: 2, nodeType: 'battle', refId: 'event-raider-trail', status: 'available' },
+      { id: 'node-3', index: 3, nodeType: 'camp', refId: 'event-quiet-campfire', status: 'locked' },
+      { id: 'node-4', index: 4, nodeType: 'boss', refId: 'event-fallen-observatory', status: 'locked' },
     ],
   },
   currentNodeId: 'node-2',
@@ -55,6 +55,26 @@ export const MOCK_RUN_STATE: RunState = {
   },
   availableEvents: EVENT_TEMPLATES.slice(0, 4),
   availableBattles: BATTLE_TEMPLATES,
+  completedNodeResults: [
+    {
+      nodeId: 'node-1',
+      choiceId: 'choice-search-supplies',
+      summary: 'Stage1 mock：断裂商队节点已作为已完成占位。',
+    },
+  ],
+  save: {
+    slotId: 'stage1-mock-slot',
+    lastSavedAt: null,
+    autoSaveCount: 0,
+  },
+  presentation: {
+    activeScreen: 'map',
+    selectedNodeId: 'node-2',
+    pendingEncounter: null,
+    currentEvent: null,
+    currentChoice: null,
+    resultMessage: 'Stage1 mock 数据仍保留，供向后兼容展示或验证使用。',
+  },
 };
 
 const mockEncounterEnemyIds = new Set<string>(BATTLE_TEMPLATES[0].enemyIds);

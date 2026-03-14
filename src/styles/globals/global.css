@@ -29,6 +29,11 @@ button {
   font: inherit;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .screen-shell {
   position: relative;
   min-height: 100vh;
@@ -134,7 +139,8 @@ button {
   outline-offset: 2px;
 }
 
-.stage1-panel-grid {
+.stage1-panel-grid,
+.stage2-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -177,7 +183,8 @@ button {
 }
 
 .party-list,
-.map-node-list {
+.map-node-list,
+.stage2-choice-list {
   display: grid;
   gap: 12px;
 }
@@ -200,6 +207,25 @@ button {
   font-size: 14px;
 }
 
+.map-node-card {
+  width: 100%;
+  text-align: left;
+}
+
+.map-node-card--selected {
+  border-color: rgba(169, 183, 255, 0.8);
+  box-shadow: 0 0 0 1px rgba(169, 183, 255, 0.25);
+}
+
+.inline-result {
+  margin: 16px 0 0;
+  color: #dce3ff;
+}
+
+.stage2-actions-inline {
+  margin-top: 20px;
+}
+
 .tag-list {
   display: flex;
   flex-wrap: wrap;
@@ -218,7 +244,8 @@ button {
 }
 
 @media (max-width: 800px) {
-  .stage1-panel-grid {
+  .stage1-panel-grid,
+  .stage2-info-grid {
     grid-template-columns: 1fr;
   }
 }

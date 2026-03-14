@@ -42,7 +42,7 @@ export type SeedInfo = {
   worldShard: string;
 };
 
-export type GameStage = 'stage0' | 'stage1';
+export type GameStage = 'stage0' | 'stage1' | 'stage2';
 
 export type GameSnapshot = {
   stage: GameStage;
