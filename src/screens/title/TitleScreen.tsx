@@ -10,6 +10,9 @@ export function TitleScreen({ onStart }: TitleScreenProps) {
       <p className="screen-card__description">
         这是 Stage 0 的标题页最小实现，用于验证应用启动、渲染与 screen 切换骨架已经连通。
       </p>
+      <p className="screen-card__description">
+        构建产物支持直接本地打开，请在执行构建后使用 <code>dist/index.html</code> 作为离线入口；源码根目录下的 <code>index.html</code> 仅供 Vite 开发与构建流程使用。
+      </p>
       <div className="screen-card__actions">
         <button className="primary-button" type="button" onClick={onStart}>
           开始冒险

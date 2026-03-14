@@ -14,6 +14,9 @@ export function StartScreen({ run, encounterNames, onBackToTitle }: StartScreenP
       <p className="screen-card__description">
         当前页面仍是 Stage 0 壳层中的最小接入，只用于证明强类型静态模板已经可以驱动队伍与地图占位渲染。
       </p>
+      <p className="screen-card__description">
+        如需离线查看，请先执行构建，再打开 <code>dist/index.html</code>；源码目录中的 <code>index.html</code> 不是离线入口。
+      </p>
 
       <div className="stage1-panel-grid">
         <section className="data-panel">

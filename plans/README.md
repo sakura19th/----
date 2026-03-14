@@ -130,7 +130,7 @@ src/
 - [`plans`](plans) 存放计划、路线图、执行清单和阶段说明
 - [`public`](public) 存放少量无需编译处理的公开资源
 - [`scripts`](scripts) 存放构建辅助脚本，例如单文件输出处理脚本
-- [`dist`](dist) 存放最终构建产物，例如单一 [`index.html`](index.html)
+- [`dist`](dist) 存放最终构建产物，例如单一 [`index.html`](index.html)；如需本地离线打开页面，应执行构建后打开 [`dist/index.html`](dist/index.html)
 - [`src`](src) 是后续正式开发的主目录
 
 ### [`src/app`](src/app)
