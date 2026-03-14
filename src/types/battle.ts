@@ -182,6 +182,16 @@ export type BattleRandomSource = {
   factor(context?: BattleRandomContext): number;
 };
 
+export type BattleTimelineState = {
+  awaitingUnitId: Identifier | null;
+  readyQueue: readonly Identifier[];
+  lastActedUnitId: Identifier | null;
+  lastActionAt: number | null;
+  presentationLockUntil: number | null;
+  actionSequence: number;
+  animationPhase: 'idle' | 'queued' | 'acting' | 'resolving';
+};
+
 export type BattleUnitTemplateSource = CharacterTemplate | PartyMember | EnemyTemplate;
 
 export type BattleUnitState = {
@@ -255,6 +265,7 @@ export type BattleState = {
     bonusSupply?: number;
     extra?: Record<string, unknown>;
   };
+  timeline: BattleTimelineState;
   random: BattleRandomSource;
   metadata?: Record<string, unknown>;
 };

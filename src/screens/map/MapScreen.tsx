@@ -1,5 +1,4 @@
-import type { PartyMember, RunState } from '../../types';
-import { deriveCombatStats } from '../../domain/formulas/deriveCombatStats';
+import type { RunState } from '../../types';
 
 type MapScreenProps = {
   run: RunState;
@@ -7,15 +6,6 @@ type MapScreenProps = {
   onOpenNode: () => void;
   onBackToTitle: () => void;
 };
-
-function getMemberResources(member: PartyMember) {
-  const derived = deriveCombatStats({ ...member.stats, level: member.progression?.level ?? 1 });
-  const maxHp = derived.maxHp;
-  const maxSp = derived.maxSp;
-  const hp = member.stats.hp ?? maxHp;
-  const sp = member.stats.sp ?? maxSp;
-  return { hp: Math.min(hp, maxHp), maxHp, sp: Math.min(sp, maxSp), maxSp };
-}
 
 function getNodeLabel(status: RunState['map']['nodes'][number]['status']) {
   switch (status) {
@@ -34,61 +24,13 @@ export function MapScreen({ run, onSelectNode, onOpenNode, onBackToTitle }: MapS
   const selectedNode = run.map.nodes.find((node) => node.id === selectedNodeId) ?? run.map.nodes[0];
 
   return (
-    <section className="screen-card stage1-screen-card">
-      <span className="screen-card__eyebrow">Stage 2 / Run Map</span>
+    <section className="game-layout__card">
       <h2 className="screen-card__title">地图推进</h2>
       <p className="screen-card__description">
-        这里展示正式 run state：可用节点可进入，已完成节点会记录结果，节点结算后自动回到地图并触发自动存档骨架。
+        可用节点可进入，已完成节点会记录结果，节点结算后自动回到地图并触发自动存档。
       </p>
 
-      <div className="stage1-panel-grid">
-        <section className="data-panel">
-          <h3 className="data-panel__title">本局概览</h3>
-          <dl className="kv-list">
-            <div>
-              <dt>Seed</dt>
-              <dd>{run.snapshot.seed.runSeed}</dd>
-            </div>
-            <div>
-              <dt>世界碎片</dt>
-              <dd>{run.snapshot.seed.worldShard}</dd>
-            </div>
-            <div>
-              <dt>碎晶</dt>
-              <dd>{run.resources.shards}</dd>
-            </div>
-            <div>
-              <dt>补给</dt>
-              <dd>{run.resources.supply}</dd>
-            </div>
-            <div>
-              <dt>自动存档</dt>
-              <dd>{run.save.autoSaveCount} 次</dd>
-            </div>
-          </dl>
-          {run.presentation.resultMessage ? <p className="inline-result">{run.presentation.resultMessage}</p> : null}
-        </section>
-
-        <section className="data-panel">
-          <h3 className="data-panel__title">队伍</h3>
-          <div className="party-list">
-            {run.party.map((member) => (
-              <article className="data-card" key={member.instanceId}>
-                <strong>
-                  {member.identity.name} / {member.identity.title}
-                </strong>
-                <span>
-                  {member.classKey} · {member.role} · 关系 {member.currentRelationToLeader}
-                </span>
-                <span>
-                  {(() => { const r = getMemberResources(member); return `HP ${r.hp}/${r.maxHp} · SP ${r.sp}/${r.maxSp}`; })()}
-                </span>
-                <span>状态：{member.activeStatusEffects.length > 0 ? member.activeStatusEffects.join('、') : '无'}</span>
-              </article>
-            ))}
-          </div>
-        </section>
-
+      <div className="map-screen__grid">
         <section className="data-panel">
           <h3 className="data-panel__title">地图节点</h3>
           <div className="map-node-list">
@@ -109,7 +51,7 @@ export function MapScreen({ run, onSelectNode, onOpenNode, onBackToTitle }: MapS
           </div>
         </section>
 
-        <section className="data-panel">
+        <section className="data-panel map-screen__current">
           <h3 className="data-panel__title">当前选择</h3>
           <div className="data-card">
             <strong>

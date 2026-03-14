@@ -40,8 +40,6 @@ function createUnitState(params: {
   const { unit, side, index, realmTier, skillIds } = params;
   const derived = deriveUnitCombatStats(unit);
 
-  // HP/SP：如果模板中已经有 hp/maxHp（由 createRun 公式计算写入），使用其比例；
-  // 否则（如敌人模板，没有 hp/maxHp）默认满血满SP。
   const templateHp = unit.stats.hp ?? derived.maxHp;
   const templateMaxHp = unit.stats.maxHp ?? derived.maxHp;
   const hpRatio = templateMaxHp > 0 ? templateHp / templateMaxHp : 1;
@@ -226,6 +224,15 @@ export function createBattleState(input: CreateBattleStateInput): BattleState {
       baseShards: input.rewardConfig?.baseShards ?? sumEnemyRewards(input.enemies),
       bonusSupply: input.rewardConfig?.bonusSupply,
       extra: input.rewardConfig?.extra,
+    },
+    timeline: {
+      awaitingUnitId: null,
+      readyQueue: [],
+      lastActedUnitId: null,
+      lastActionAt: null,
+      presentationLockUntil: null,
+      actionSequence: 0,
+      animationPhase: 'idle',
     },
     random: input.random,
     metadata: {

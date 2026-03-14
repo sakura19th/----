@@ -21,8 +21,7 @@ export function EventScreen({ run, onChoose }: EventScreenProps) {
   }
 
   return (
-    <section className="screen-card stage1-screen-card">
-      <span className="screen-card__eyebrow">Stage 2 / Event</span>
+    <section className="game-layout__card">
       <h2 className="screen-card__title">{event.text.title}</h2>
       <p className="screen-card__description">{event.text.description}</p>
 

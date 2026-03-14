@@ -6,7 +6,6 @@ type StartScreenProps = {
 export function StartScreen({ onStartRun, onBackToTitle }: StartScreenProps) {
   return (
     <section className="screen-card">
-      <span className="screen-card__eyebrow">Stage 2 / New Run</span>
       <h2 className="screen-card__title">新局初始化</h2>
       <p className="screen-card__description">
         本页不再只是 Stage1 的 mock 占位，而是 Stage2 的正式入口：点击后会创建 run、生成最小地图并进入真实主流程。

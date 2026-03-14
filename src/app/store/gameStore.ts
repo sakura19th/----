@@ -1,4 +1,10 @@
-import { BATTLE_TEMPLATES, ENEMY_TEMPLATES, SKILL_TEMPLATES } from '../../data';
+import { BATTLE_TEMPLATES, ENEMY_TEMPLATES, HERO_ARCHETYPES, HUB_DIALOGUE_LINES, SKILL_TEMPLATES, WORLD_CATALOG } from '../../data';
+import {
+  ATB_ACTION_ANIMATION_MS,
+  ATB_ACTION_MIN_INTERVAL_MS,
+  ATB_THRESHOLD,
+  advanceAtbTimeline,
+} from '../../domain/battle/atb';
 import { createBattleState } from '../../domain/battle/createBattleState';
 import { resolveTurn } from '../../domain/battle/resolveTurn';
 import { applyResourceRewards } from '../../domain/reward/applyRewards';
@@ -6,7 +12,18 @@ import { createRun } from '../../domain/run/createRun';
 import { getRecruitTemplate, getResolvableEvent, resolveNode } from '../../domain/run/resolveNode';
 import { deleteRun, loadRun } from '../../domain/save/loadRun';
 import { saveRun } from '../../domain/save/saveRun';
-import type { BattleState, EnemyTemplate, EventChoice, Identifier, RunEncounterState, RunScreen, RunState } from '../../types';
+import type {
+  BattleState,
+  EnemyTemplate,
+  EventChoice,
+  Identifier,
+  PlayerCreationForm,
+  PlayerProfile,
+  RunEncounterState,
+  RunState,
+  WorldDefinition,
+  WorldEntryContext,
+} from '../../types';
 
 export type BattleCommand = {
   actionType: 'attack' | 'skill' | 'guard';
@@ -15,12 +32,26 @@ export type BattleCommand = {
 };
 
 export type GameStore = {
-  screen: RunScreen;
+  appPhase: 'title' | 'characterCreation' | 'hub' | 'worldSelect' | 'worldTransition' | 'worldRun' | 'result';
   run: RunState | null;
+  playerProfile: PlayerProfile | null;
+  selectedWorldId: Identifier | null;
+  worldEntry: WorldEntryContext | null;
+  hubDialogueIndex: number;
+  worldTransitionStatus: 'idle' | 'ready' | 'failed';
+  worldTransitionMessage: string | null;
   boot: () => void;
-  enterStart: () => void;
-  startNewRun: () => void;
+  enterCharacterCreation: () => void;
+  confirmCharacterCreation: (form: PlayerCreationForm) => { ok: boolean; message?: string };
   returnToTitle: () => void;
+  advanceHubDialogue: () => void;
+  skipHubDialogue: () => void;
+  enterWorldSelect: () => void;
+  selectWorld: (worldId: Identifier) => void;
+  confirmWorldSelection: () => { ok: boolean; message?: string };
+  commitWorldTransition: () => void;
+  retryWorldTransition: () => void;
+  backToHub: () => void;
   selectNode: (nodeId: Identifier) => void;
   openCurrentNode: () => void;
   chooseEvent: (choice: EventChoice) => void;
@@ -33,24 +64,40 @@ export type GameStore = {
 
 type Listener = () => void;
 
-type BattleDecisionPoint = {
-  state: BattleState;
-  actorUnitId: Identifier;
-  reason: 'player-input';
-} | {
-  state: BattleState;
-  actorUnitId: null;
-  reason: 'battle-ended';
-};
+type BattleDecisionPoint =
+  | {
+      state: BattleState;
+      actorUnitId: Identifier;
+      reason: 'player-input';
+    }
+  | {
+      state: BattleState;
+      actorUnitId: null;
+      reason: 'battle-ended';
+    };
 
 function createInitialStore(): GameStore {
   return {
-    screen: 'title',
+    appPhase: 'title',
     run: null,
+    playerProfile: null,
+    selectedWorldId: WORLD_CATALOG[0]?.id ?? null,
+    worldEntry: null,
+    hubDialogueIndex: 0,
+    worldTransitionStatus: 'idle',
+    worldTransitionMessage: null,
     boot: () => undefined,
-    enterStart: () => undefined,
-    startNewRun: () => undefined,
+    enterCharacterCreation: () => undefined,
+    confirmCharacterCreation: () => ({ ok: false, message: '未初始化' }),
     returnToTitle: () => undefined,
+    advanceHubDialogue: () => undefined,
+    skipHubDialogue: () => undefined,
+    enterWorldSelect: () => undefined,
+    selectWorld: () => undefined,
+    confirmWorldSelection: () => ({ ok: false, message: '未初始化' }),
+    commitWorldTransition: () => undefined,
+    retryWorldTransition: () => undefined,
+    backToHub: () => undefined,
     selectNode: () => undefined,
     openCurrentNode: () => undefined,
     chooseEvent: () => undefined,
@@ -60,10 +107,6 @@ function createInitialStore(): GameStore {
     deleteSave: () => undefined,
     fleeBattle: () => undefined,
   };
-}
-
-function deriveScreen(run: RunState | null, fallback: RunScreen): RunScreen {
-  return run?.presentation.activeScreen ?? fallback;
 }
 
 function createDeterministicRandom(seedText: string) {
@@ -106,21 +149,97 @@ function getBattleEnemies(encounter: RunEncounterState): readonly EnemyTemplate[
   return enemies;
 }
 
-function getNextReadyUnitId(state: BattleState) {
-  const sortedUnits = [...state.units].sort(
-    (left, right) => left.runtime.actionCount - right.runtime.actionCount || right.derived.SPD - left.derived.SPD || left.index - right.index,
-  );
+function refreshAtbQueue(state: BattleState): BattleState {
+  if (state.result.finished) {
+    return {
+      ...state,
+      timeline: {
+        ...state.timeline,
+        awaitingUnitId: null,
+        readyQueue: [],
+        animationPhase: 'idle',
+      },
+    };
+  }
 
-  return sortedUnits.find((unit) => !unit.isDead && unit.canAct)?.unitId ?? null;
+  if (state.timeline.readyQueue.length > 0) {
+    const nextReadyUnitId = state.timeline.readyQueue.find((unitId) => {
+      const unit = state.units.find((candidate) => candidate.unitId === unitId);
+      return Boolean(unit && !unit.isDead && unit.canAct && unit.gauge >= ATB_THRESHOLD);
+    }) ?? null;
+
+    return {
+      ...state,
+      timeline: {
+        ...state.timeline,
+        awaitingUnitId: nextReadyUnitId,
+        readyQueue: nextReadyUnitId ? state.timeline.readyQueue : [],
+        animationPhase: nextReadyUnitId ? 'queued' : 'idle',
+      },
+    };
+  }
+
+  let workingState = state;
+  let safety = 0;
+
+  while (!workingState.result.finished && workingState.timeline.readyQueue.length === 0 && safety < 240) {
+    const timeline = advanceAtbTimeline(
+      workingState.units.map((unit) => ({
+        unitId: unit.unitId,
+        rawSpeed: unit.derived.SPD,
+        gauge: unit.gauge,
+        canAct: unit.canAct,
+        isDead: unit.isDead,
+      })),
+    );
+
+    const nextUnits = workingState.units.map((unit) => {
+      const advanced = timeline.advancedUnits.find((candidate) => candidate.unitId === unit.unitId);
+      return advanced ? { ...unit, gauge: advanced.gaugeAfterClamp } : unit;
+    });
+
+    workingState = {
+      ...workingState,
+      tick: workingState.tick + 1,
+      units: nextUnits,
+      timeline: {
+        ...workingState.timeline,
+        readyQueue: timeline.readyUnitIds,
+        awaitingUnitId: timeline.readyUnitIds[0] ?? null,
+        animationPhase: timeline.readyUnitIds.length > 0 ? 'queued' : 'idle',
+      },
+    };
+    safety += 1;
+  }
+
+  return workingState;
 }
 
 function advanceBattleToDecision(state: BattleState): BattleDecisionPoint {
-  let nextState = state;
+  let nextState = refreshAtbQueue(state);
+  let safety = 0;
 
-  while (!nextState.result.finished) {
-    const actorUnitId = getNextReadyUnitId(nextState);
+  while (!nextState.result.finished && safety < 64) {
+    const now = Date.now();
+    const lockUntil = nextState.timeline.presentationLockUntil ?? 0;
+    if (lockUntil > now) {
+      nextState = {
+        ...nextState,
+        timeline: {
+          ...nextState.timeline,
+          presentationLockUntil: now,
+        },
+      };
+    }
+
+    const actorUnitId = nextState.timeline.awaitingUnitId ?? nextState.timeline.readyQueue[0] ?? null;
     if (!actorUnitId) {
-      return { state: nextState, actorUnitId: null, reason: 'battle-ended' };
+      nextState = refreshAtbQueue(nextState);
+      if (!nextState.timeline.awaitingUnitId) {
+        return { state: nextState, actorUnitId: null, reason: 'battle-ended' };
+      }
+      safety += 1;
+      continue;
     }
 
     const actor = nextState.units.find((unit) => unit.unitId === actorUnitId) ?? null;
@@ -129,14 +248,35 @@ function advanceBattleToDecision(state: BattleState): BattleDecisionPoint {
     }
 
     if (actor.side === 'party') {
-      return { state: nextState, actorUnitId, reason: 'player-input' };
+      return {
+        state: {
+          ...nextState,
+          timeline: {
+            ...nextState.timeline,
+            awaitingUnitId: actorUnitId,
+            animationPhase: 'queued',
+          },
+        },
+        actorUnitId,
+        reason: 'player-input',
+      };
     }
 
-    nextState = resolveTurn({
+    const enemyResolved = resolveTurn({
       state: nextState,
       actorUnitId,
       skillTemplates: SKILL_TEMPLATES,
     }).state;
+
+    nextState = refreshAtbQueue({
+      ...enemyResolved,
+      timeline: {
+        ...enemyResolved.timeline,
+        lastActionAt: Date.now(),
+        presentationLockUntil: Date.now() + Math.max(ATB_ACTION_MIN_INTERVAL_MS, ATB_ACTION_ANIMATION_MS),
+      },
+    });
+    safety += 1;
   }
 
   return { state: nextState, actorUnitId: null, reason: 'battle-ended' };
@@ -170,6 +310,34 @@ function createBattleEncounter(run: RunState, encounter: RunEncounterState) {
   });
 
   return advanceBattleToDecision(createdState);
+}
+
+function findWorld(worldId: Identifier | null): WorldDefinition | null {
+  if (!worldId) {
+    return null;
+  }
+
+  return WORLD_CATALOG.find((world) => world.id === worldId) ?? null;
+}
+
+function buildPlayerProfile(form: PlayerCreationForm): PlayerProfile | null {
+  const trimmedName = form.name.trim();
+  if (!trimmedName || trimmedName.length > 12) {
+    return null;
+  }
+
+  const hero = HERO_ARCHETYPES.find((candidate) => candidate.identity.id === form.heroId);
+  if (!hero) {
+    return null;
+  }
+
+  return {
+    playerId: `player-${Date.now()}`,
+    name: trimmedName,
+    heroId: hero.identity.id,
+    trait: form.trait,
+    createdAt: Date.now(),
+  };
 }
 
 function finishBattle(run: RunState, battleState: BattleState): RunState {
@@ -241,7 +409,7 @@ export function createGameStore() {
       return {
         ...current,
         run: nextRun,
-        screen: deriveScreen(nextRun, current.screen),
+        appPhase: nextRun.presentation.activeScreen === 'result' ? 'result' : 'worldRun',
       };
     });
   };
@@ -257,27 +425,152 @@ export function createGameStore() {
       setState((current) => ({
         ...current,
         run: savedRun,
-        screen: deriveScreen(savedRun, 'title'),
+        appPhase: savedRun.presentation.activeScreen === 'result' ? 'result' : 'worldRun',
+        playerProfile: current.playerProfile,
       }));
     },
-    enterStart: () => {
+    enterCharacterCreation: () => {
       setState((current) => ({
         ...current,
-        screen: 'start',
+        appPhase: 'characterCreation',
+        run: null,
+        playerProfile: null,
+        worldEntry: null,
+        worldTransitionStatus: 'idle',
+        worldTransitionMessage: null,
       }));
     },
-    startNewRun: () => {
-      const nextRun = saveRun(createRun());
+    confirmCharacterCreation: (form) => {
+      const profile = buildPlayerProfile(form);
+      if (!profile) {
+        return { ok: false, message: '请输入 1-12 个字的名称，并选择一个初始角色。' };
+      }
+
       setState((current) => ({
         ...current,
-        run: nextRun,
-        screen: 'map',
+        appPhase: 'hub',
+        playerProfile: profile,
+        hubDialogueIndex: 0,
+        selectedWorldId: WORLD_CATALOG[0]?.id ?? null,
+        worldEntry: null,
+        worldTransitionStatus: 'idle',
+        worldTransitionMessage: null,
+        run: null,
       }));
+
+      return { ok: true };
     },
     returnToTitle: () => {
       setState((current) => ({
         ...current,
-        screen: 'title',
+        appPhase: 'title',
+        run: null,
+        playerProfile: null,
+        selectedWorldId: WORLD_CATALOG[0]?.id ?? null,
+        worldEntry: null,
+        hubDialogueIndex: 0,
+        worldTransitionStatus: 'idle',
+        worldTransitionMessage: null,
+      }));
+    },
+    advanceHubDialogue: () => {
+      setState((current) => {
+        const lastIndex = Math.max(HUB_DIALOGUE_LINES.length - 1, 0);
+        const nextIndex = Math.min(current.hubDialogueIndex + 1, lastIndex);
+        return {
+          ...current,
+          hubDialogueIndex: nextIndex,
+        };
+      });
+    },
+    skipHubDialogue: () => {
+      setState((current) => ({
+        ...current,
+        hubDialogueIndex: Math.max(HUB_DIALOGUE_LINES.length - 1, 0),
+      }));
+    },
+    enterWorldSelect: () => {
+      setState((current) => ({
+        ...current,
+        appPhase: 'worldSelect',
+      }));
+    },
+    selectWorld: (worldId) => {
+      setState((current) => ({
+        ...current,
+        selectedWorldId: worldId,
+      }));
+    },
+    confirmWorldSelection: () => {
+      const selectedWorld = findWorld(state.selectedWorldId);
+      if (!state.playerProfile) {
+        return { ok: false, message: '角色数据缺失，无法进入世界。' };
+      }
+
+      if (!selectedWorld || selectedWorld.unlockStatus !== 'available') {
+        return { ok: false, message: '当前未找到可进入的世界。' };
+      }
+
+      const entry: WorldEntryContext = {
+        runId: `run-${Date.now()}`,
+        worldId: selectedWorld.id,
+        flowId: selectedWorld.flowId,
+        selectedAt: Date.now(),
+        playerProfile: state.playerProfile,
+      };
+
+      setState((current) => ({
+        ...current,
+        appPhase: 'worldTransition',
+        worldEntry: entry,
+        worldTransitionStatus: 'ready',
+        worldTransitionMessage: `正在投送至 ${selectedWorld.title}……`,
+      }));
+
+      return { ok: true };
+    },
+    commitWorldTransition: () => {
+      const selectedWorld = findWorld(state.worldEntry?.worldId ?? state.selectedWorldId);
+      if (!selectedWorld || !state.playerProfile) {
+        setState((current) => ({
+          ...current,
+          worldTransitionStatus: 'failed',
+          worldTransitionMessage: '世界初始化失败，请返回主神世界重试。',
+        }));
+        return;
+      }
+
+      const nextRun = saveRun(
+        createRun({
+          heroId: state.playerProfile.heroId,
+          seed: state.worldEntry?.runId,
+          playerName: state.playerProfile.name,
+          worldName: selectedWorld.title,
+        }),
+      );
+
+      setState((current) => ({
+        ...current,
+        run: nextRun,
+        appPhase: 'worldRun',
+        worldTransitionStatus: 'ready',
+        worldTransitionMessage: `${selectedWorld.title} 已完成投送。`,
+      }));
+    },
+    retryWorldTransition: () => {
+      setState((current) => ({
+        ...current,
+        appPhase: 'worldTransition',
+        worldTransitionStatus: 'ready',
+        worldTransitionMessage: current.worldEntry ? `重新准备进入 ${findWorld(current.worldEntry.worldId)?.title ?? '目标世界'}……` : '重新准备进入世界……',
+      }));
+    },
+    backToHub: () => {
+      setState((current) => ({
+        ...current,
+        appPhase: 'hub',
+        worldTransitionStatus: 'idle',
+        worldTransitionMessage: null,
       }));
     },
     selectNode: (nodeId) => {
@@ -436,7 +729,7 @@ export function createGameStore() {
       setState((current) => ({
         ...current,
         run: null,
-        screen: 'title',
+        appPhase: 'title',
       }));
     },
     fleeBattle: () => {

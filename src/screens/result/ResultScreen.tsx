@@ -44,8 +44,7 @@ export function ResultScreen({ run, onReturnToTitle }: ResultScreenProps) {
   const bossResolved = bossNode ? resolvedNodeIds.has(bossNode.id) : false;
 
   return (
-    <section className="screen-card stage1-screen-card">
-      <span className="screen-card__eyebrow">Stage 5 / Result</span>
+    <section className="game-layout__card result-screen-card">
       <h2 className="screen-card__title">本局结算</h2>
       <p className="screen-card__description">
         从标题页到终局的最小闭环已接通，当前页面用于汇总本局推进、队伍状态、资源结余与终局结果。

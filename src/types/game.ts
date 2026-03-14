@@ -44,6 +44,50 @@ export type SeedInfo = {
 
 export type GameStage = 'stage0' | 'stage1' | 'stage2';
 
+export type AppFlowPhase = 'title' | 'characterCreation' | 'hub' | 'worldSelect' | 'worldTransition' | 'worldRun' | 'result';
+
+export type PlayerTrait = 'steady' | 'reckless' | 'insightful';
+
+export type PlayerCreationForm = {
+  name: string;
+  heroId: Identifier;
+  trait: PlayerTrait;
+};
+
+export type PlayerProfile = {
+  playerId: Identifier;
+  name: string;
+  heroId: Identifier;
+  trait: PlayerTrait;
+  createdAt: number;
+};
+
+export type HubDialogueLine = {
+  id: Identifier;
+  speaker: 'system' | 'lord-god' | 'guide';
+  text: string;
+};
+
+export type WorldDefinition = {
+  id: Identifier;
+  title: string;
+  subtitle: string;
+  description: string;
+  difficultyLabel: string;
+  estimatedDuration: string;
+  unlockStatus: 'available' | 'locked';
+  introText: string;
+  flowId: Identifier;
+};
+
+export type WorldEntryContext = {
+  runId: Identifier;
+  worldId: Identifier;
+  flowId: Identifier;
+  selectedAt: number;
+  playerProfile: PlayerProfile;
+};
+
 export type GameSnapshot = {
   stage: GameStage;
   version: string;

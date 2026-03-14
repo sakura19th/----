@@ -13,8 +13,7 @@ export function RecruitScreen({ run, onChoose }: RecruitScreenProps) {
   }
 
   return (
-    <section className="screen-card stage1-screen-card">
-      <span className="screen-card__eyebrow">Stage 2 / Recruit</span>
+    <section className="game-layout__card">
       <h2 className="screen-card__title">{event.text.title}</h2>
       <p className="screen-card__description">{event.text.description}</p>
       <p className="screen-card__description">本页只接通最小招募结算：满足条件时将队员加入队伍并返回地图，不进入更复杂的确认流程。</p>

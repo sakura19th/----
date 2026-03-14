@@ -6,11 +6,10 @@ import { generateMap } from './generateMap';
 export type CreateRunInput = {
   heroId?: string;
   seed?: string;
+  playerName?: string;
+  worldName?: string;
 };
 
-/**
- * 用公式从基础属性计算 maxHp/maxSp，并设置为满血满SP状态。
- */
 function computeResourceStats(template: CharacterTemplate, level: number) {
   const derived = deriveCombatStats({
     ...template.stats,
@@ -24,12 +23,17 @@ function computeResourceStats(template: CharacterTemplate, level: number) {
   };
 }
 
-function toPartyMember(template: CharacterTemplate, index: number): PartyMember {
+function toPartyMember(template: CharacterTemplate, index: number, playerName?: string): PartyMember {
   const level = 1;
   const resources = computeResourceStats(template, level);
+  const identityName = index === 0 && playerName ? playerName : template.identity.name;
 
   return {
     ...template,
+    identity: {
+      ...template.identity,
+      name: identityName,
+    },
     stats: {
       ...template.stats,
       ...resources,
@@ -54,17 +58,17 @@ function buildSeed(seed?: string) {
 
 export function createRun(input: CreateRunInput = {}): RunState {
   const leaderTemplate = HERO_ARCHETYPES.find((hero) => hero.identity.id === input.heroId) ?? HERO_ARCHETYPES[0];
-  const leader = toPartyMember(leaderTemplate, 0);
+  const leader = toPartyMember(leaderTemplate, 0, input.playerName);
   const map = generateMap();
   const firstNode = map.nodes.find((node) => node.status === 'available') ?? map.nodes[0];
 
   return {
     snapshot: {
       stage: 'stage2',
-      version: '0.5.0-stage5',
+      version: '0.6.0-single-loop',
       seed: {
         runSeed: buildSeed(input.seed),
-        worldShard: '碎片世界-北境回廊',
+        worldShard: input.worldName ?? '废弃前哨站',
       },
     },
     leader,

@@ -23,6 +23,7 @@ import { calculateShield } from '../formulas/shield';
 import { decideEnemyAction } from './enemyAi';
 import { applyStatusEffect, processStatusEffects } from './applyStatusEffects';
 import { absorbDamageByShields, applyShield, cleanupShields } from './shields';
+import { ATB_ACTION_ANIMATION_MS, ATB_ACTION_MIN_INTERVAL_MS, consumeAtbTurn } from './atb';
 
 const BURST_GAIN = {
   basicHit: 12,
@@ -597,6 +598,12 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
     ...input.state,
     turn: input.state.turn + 1,
     tick: input.state.tick + 1,
+    timeline: {
+      ...input.state.timeline,
+      awaitingUnitId: null,
+      readyQueue: input.state.timeline.readyQueue.filter((unitId) => unitId !== input.actorUnitId),
+      animationPhase: 'acting',
+    },
   };
 
   const turnStart = processStatusEffects({ state, actorUnitId: actor.unitId, phase: 'turn-start' });
@@ -615,8 +622,17 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
     });
     const finalState = finalizeResult(updatePartyState(state), pendingLogs);
     const committedLogs = appendLogs(finalState, pendingLogs);
-    const nextState = {
+    const actionTime = Date.now();
+    const nextState: BattleState = {
       ...finalState,
+      timeline: {
+        ...finalState.timeline,
+        lastActedUnitId: actor.unitId,
+        lastActionAt: actionTime,
+        presentationLockUntil: actionTime + Math.max(ATB_ACTION_MIN_INTERVAL_MS, ATB_ACTION_ANIMATION_MS),
+        actionSequence: finalState.timeline.actionSequence + 1,
+        animationPhase: finalState.result.finished ? 'idle' : 'resolving',
+      },
       logs: [...finalState.logs, ...committedLogs],
     };
     return {
@@ -796,6 +812,7 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
   currentActor = getUnit(state, currentActor.unitId) ?? currentActor;
   currentActor = {
     ...currentActor,
+    gauge: consumeAtbTurn(currentActor.gauge),
     runtime: {
       ...currentActor.runtime,
       actionCount: currentActor.runtime.actionCount + 1,

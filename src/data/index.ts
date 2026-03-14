@@ -3,3 +3,4 @@ export * from './constants';
 export * from './enemies/templates';
 export * from './events/templates';
 export * from './skills/templates';
+export * from './worlds';
