@@ -1,4 +1,4 @@
-import type { BattleTemplate } from './battle';
+import type { BattleResult, BattleState, BattleTemplate } from './battle';
 import type { PartyMember } from './character';
 import type { EventChoice, EventNodeKind, EventTemplate } from './event';
 import type { GameSnapshot, Identifier } from './game';
@@ -27,6 +27,7 @@ export type ResolvedNodeResult = {
   nodeId: Identifier;
   choiceId: Identifier;
   summary: string;
+  battleResult?: BattleResult;
 };
 
 export type RunSaveMeta = {
@@ -42,6 +43,7 @@ export type RunEncounterState = {
   eventId: Identifier;
   battleId?: Identifier;
   recruitId?: Identifier;
+  battleState?: BattleState;
 };
 
 export type RunPresentationState = {

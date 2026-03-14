@@ -36,7 +36,9 @@ export type StatusEffectKey =
   | 'focused'
   | 'regen'
   | 'vulnerable'
-  | 'shielded';
+  | 'shielded'
+  | 'broken'
+  | 'charged';
 
 export type CharacterRole = 'frontline' | 'controller' | 'healer' | 'striker';
 
@@ -60,7 +62,15 @@ export type CharacterProgression = {
   growthBias: WeightedValue<keyof BaseAttributes>;
 };
 
-export type CharacterStats = BaseAttributes & ResourcePool;
+export type CharacterStats = BaseAttributes &
+  ResourcePool & {
+    strength?: number;
+    agility?: number;
+    intelligence?: number;
+    spiritPower?: number;
+    charisma?: number;
+    luck?: number;
+  };
 
 export type CharacterLoadout = {
   skillIds: readonly Identifier[];

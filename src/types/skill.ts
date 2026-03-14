@@ -11,7 +11,9 @@ export type SkillEffectType =
   | 'cleanse'
   | 'gain-sp';
 
-export type SkillScalingStat = 'attack' | 'defense' | 'speed' | 'spirit';
+export type SkillScalingStat = 'attack' | 'defense' | 'speed' | 'spirit' | 'patk' | 'matk' | 'healp';
+
+export type SkillDamageType = 'physical' | 'magical' | 'pure';
 
 export type SkillEffect = {
   type: SkillEffectType;
@@ -20,6 +22,12 @@ export type SkillEffect = {
   statusKey?: StatusEffectKey;
   duration?: number;
   stacks?: number;
+  scalingStat?: SkillScalingStat;
+  damageType?: SkillDamageType;
+  extraCrit?: number;
+  extraCritDamage?: number;
+  burstGain?: number;
+  metadata?: Record<string, unknown>;
 };
 
 export type SkillTemplate = {
