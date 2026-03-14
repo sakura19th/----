@@ -103,19 +103,17 @@ button:disabled {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: 24px;
+  padding: clamp(20px, 2vw, 28px);
   overflow: hidden;
 }
 
 .screen-shell__content--fill {
-  align-items: stretch;
-  justify-content: stretch;
-  padding: 0;
+  padding: clamp(18px, 1.4vw, 24px);
 }
 
 .screen-card {
@@ -492,6 +490,221 @@ button:disabled {
 .progress-bar__fill--sp { background: var(--blue-500); }
 .progress-bar__fill--atb { background: linear-gradient(90deg, var(--yellow-400), var(--orange-400)); }
 
+.stage-screen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+}
+
+.stage-screen__card {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: clamp(24px, 2.8vw, 40px);
+  border: 1px solid rgba(75, 85, 99, 0.75);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 34%),
+    radial-gradient(circle at top right, rgba(192, 132, 252, 0.12), transparent 30%),
+    rgba(15, 23, 42, 0.82);
+  box-shadow: 0 28px 100px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(16px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 28px;
+  overflow: hidden;
+}
+
+.stage-screen__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 0;
+  align-items: flex-start;
+}
+
+.stage-screen__hero-main {
+  flex: 1;
+  min-width: 0;
+  max-width: min(72rem, 100%);
+}
+
+.stage-screen__hero-side {
+  flex: 0 0 min(24rem, 32%);
+  min-width: 220px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.stage-screen__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.stage-screen__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  background: rgba(30, 41, 59, 0.75);
+  color: var(--gray-300);
+  font-size: 0.875rem;
+}
+
+.stage-screen__hero-note {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(75, 85, 99, 0.75);
+  color: var(--gray-300);
+  font-size: 0.9375rem;
+}
+
+.stage-screen__grid {
+  min-height: 0;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(560px, 2.1fr) minmax(280px, 1fr);
+}
+
+.stage-screen__grid--two {
+  grid-template-columns: minmax(340px, 1.05fr) minmax(620px, 1.7fr);
+}
+
+.stage-screen__panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 1.8vw, 28px);
+  border-radius: 22px;
+  border: 1px solid rgba(75, 85, 99, 0.75);
+  background: rgba(17, 24, 39, 0.78);
+  overflow: hidden;
+}
+
+.stage-screen__panel--emphasis {
+  background:
+    linear-gradient(180deg, rgba(37, 99, 235, 0.15), rgba(17, 24, 39, 0.84)),
+    rgba(17, 24, 39, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.12);
+}
+
+.stage-screen__panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.stage-screen__panel-copy {
+  margin: 4px 0 0;
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+.stage-screen__panel-content {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.stage-screen__panel-actions {
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.stage-screen__stack {
+  display: grid;
+  gap: 12px;
+}
+
+.stage-screen__stats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.stage-screen__stat {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(51, 65, 85, 0.45);
+  border: 1px solid rgba(75, 85, 99, 0.75);
+  display: grid;
+  gap: 4px;
+}
+
+.stage-screen__stat-label {
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+}
+
+.stage-screen__stat-value {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.stage-screen__list-card {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(51, 65, 85, 0.45);
+  border: 1px solid rgba(75, 85, 99, 0.75);
+}
+
+.stage-screen__list-card strong {
+  color: #fff;
+}
+
+.stage-screen__list-card span {
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+.stage-screen__list-button {
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.stage-screen__list-button:hover {
+  background: rgba(63, 74, 89, 0.72);
+}
+
+.stage-screen__list-button--selected {
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.42);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.18), rgba(51, 65, 85, 0.55));
+}
+
+.stage-screen__section-label {
+  margin: 0;
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stage-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .game-layout {
   display: flex;
   width: 100%;
@@ -534,13 +747,13 @@ button:disabled {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
 }
 
 .game-layout__card {
   width: 100%;
-  max-width: 960px;
+  max-width: none;
   min-height: 100%;
   padding: 24px;
   border: 1px solid var(--gray-700);
@@ -554,7 +767,7 @@ button:disabled {
 
 .battle-screen-card,
 .result-screen-card {
-  max-width: 1100px;
+  max-width: none;
 }
 
 .map-screen__grid {
@@ -564,9 +777,58 @@ button:disabled {
   margin-top: 20px;
 }
 
+@media (max-width: 1400px) {
+  .stage-screen__grid {
+    grid-template-columns: minmax(240px, 0.9fr) minmax(440px, 1.7fr) minmax(240px, 0.94fr);
+  }
+
+  .stage-screen__grid--two {
+    grid-template-columns: minmax(300px, 1fr) minmax(460px, 1.4fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .stage-screen__hero {
+    flex-direction: column;
+  }
+
+  .stage-screen__hero-side {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stage-screen__grid,
+  .stage-screen__grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stage-screen__grid > :last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+}
+
 @media (max-width: 1024px) {
   .game-layout__sidebar {
     flex-basis: 260px;
+  }
+
+  .stage-screen__card {
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 900px) {
+  .stage-screen__hero-side,
+  .stage-screen__grid,
+  .stage-screen__grid--two,
+  .stage-screen__stats,
+  .map-screen__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stage-screen__grid > :last-child:nth-child(odd) {
+    grid-column: auto;
   }
 }
 
@@ -613,7 +875,8 @@ button:disabled {
   }
 
   .screen-card,
-  .game-layout__card {
+  .game-layout__card,
+  .stage-screen__card {
     padding: 20px;
   }
 
@@ -636,7 +899,18 @@ button:disabled {
   }
 
   .screen-card__actions,
-  .battle-action-grid {
+  .battle-action-grid,
+  .stage-screen__actions {
     flex-direction: column;
+  }
+
+  .stage-screen__card {
+    padding: 18px;
+    gap: 18px;
+  }
+
+  .stage-screen__panel {
+    padding: 16px;
+    border-radius: 18px;
   }
 }
