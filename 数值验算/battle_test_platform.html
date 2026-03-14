@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>无限世界 v3 数值与战斗系统测试平台</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --line: #334155;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1, h2, h3 { margin: 0 0 12px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    button {
+      background: var(--accent);
+      border: 0;
+      color: #082f49;
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px dashed var(--line);
+    }
+    select {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .stat .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .stat .value {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+    .warn { color: var(--warn); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #0b1220;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: 0;
+      color: #cbd5e1;
+    }
+    .mono {
+      font-family: Consolas, "Courier New", monospace;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .legend {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .summary-card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .summary-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #cbd5e1;
+    }
+    .summary-card li + li {
+      margin-top: 6px;
+    }
+    .subtle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .asset-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 16px;
+    }
+    .asset-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .list-card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      max-height: 320px;
+      overflow: auto;
+    }
+    .asset-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .asset-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .asset-list li:last-child {
+      border-bottom: 0;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      margin: 2px 6px 0 0;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .build-preview,
+    .batch-results {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 180px;
+    }
+    .batch-table-wrap {
+      overflow: auto;
+      max-height: 360px;
+      margin-top: 10px;
+    }
+    .visual-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .visual-tabs button.active {
+      box-shadow: inset 0 0 0 2px rgba(8, 47, 73, 0.45);
+      transform: translateY(-1px);
+    }
+    .visual-view {
+      display: none;
+    }
+    .visual-view.active {
+      display: block;
+    }
+    .visual-layout {
+      display: grid;
+      grid-template-columns: minmax(340px, 1.2fr) minmax(320px, 0.8fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .battle-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .battle-board {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .team-panel {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .team-panel.enemy {
+      border-color: rgba(239, 68, 68, 0.45);
+    }
+    .team-panel.ally {
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .team-members {
+      display: grid;
+      gap: 10px;
+    }
+    .unit-card {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .unit-card.defeated {
+      opacity: 0.55;
+      filter: grayscale(0.2);
+    }
+    .unit-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .unit-name {
+      font-weight: 700;
+    }
+    .unit-meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .resource-row {
+      margin-top: 6px;
+    }
+    .resource-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .bar-track {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      background: #0b1220;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+    .bar-fill.hp { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .bar-fill.sp { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+    .bar-fill.shield { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .bar-fill.burst { background: linear-gradient(90deg, #c084fc, #8b5cf6); }
+    .unit-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .mini-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: #dbeafe;
+      background: rgba(59, 130, 246, 0.18);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+    .mini-tag.warn {
+      color: #fde68a;
+      background: rgba(245, 158, 11, 0.14);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+    .mini-tag.bad {
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .battle-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .summary-pill {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .summary-pill .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .summary-pill .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .log-panel,
+    .chart-panel,
+    .detail-panel {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .event-log {
+      display: grid;
+      gap: 8px;
+      max-height: 520px;
+      overflow: auto;
+    }
+    .event-item {
+      border-left: 3px solid rgba(56, 189, 248, 0.55);
+      background: rgba(15, 23, 42, 0.78);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .event-item.bad {
+      border-left-color: rgba(239, 68, 68, 0.7);
+    }
+    .event-item.warn {
+      border-left-color: rgba(245, 158, 11, 0.7);
+    }
+    .event-tick {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+    .chart-list {
+      display: grid;
+      gap: 12px;
+    }
+    .chart-row {
+      display: grid;
+      gap: 6px;
+    }
+    .chart-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .chart-stack {
+      display: flex;
+      width: 100%;
+      height: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #0b1220;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .chart-segment.a { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+    .chart-segment.b { background: linear-gradient(90deg, #fb7185, #ef4444); }
+    .detail-columns {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .detail-card {
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    @media (max-width: 1100px) {
+      .asset-layout,
+      .visual-layout,
+      .battle-board,
+      .detail-columns {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>无限世界 v3 数值与战斗系统测试平台</h1>
+      <div class="toolbar">
+        <button id="runBtn">运行全部测试</button>
+        <button id="downloadBtn" class="secondary">下载 JSON 报表</button>
+      </div>
+      <div class="legend">固定工程化假设：SummonInheritance = 0.5 + min(0.35, LEAD / 1000)；公式测试 RandomFactor=1；ATB 初始条=0；SP 回复在每次自身行动后触发；控制只验概率与行动压制生效率；护盾持续 3 次自身行动；同源覆盖、异源最多 3 层；BossActionGaugeBonus 乘在每 tick 的 ATB 获取速度上；R3 固定占位：damage=2.40、taken=0.20、control_out=0.10、control_in=0.10、heal_shield=1.25；最终伤害向下取整且最小 1，治疗/护盾最小 0。新增最小假设：成长方案 A 采用线性成长，1 级系数为 0.55、10 级为 0.78、30 级为 1.00、60 级为 1.45、100 级为 1.95；不同 build 通过最小技能循环体现定位，不追求完整职业系统。</div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">
+        <h2>汇总</h2>
+        <div class="legend">输出列：测试编号 / 目标 / 输入 / expected / actual / tolerance / 是否通过 / 备注</div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">
+        <h2>策划结论区</h2>
+        <div class="legend">面向等级成长、长战资源、Boss 协同、主要风险点的可读总结</div>
+      </div>
+      <div class="summary-grid" id="insightCards"></div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">
+        <h2>实际战斗测试平台（MVP）</h2>
+        <div class="legend">基于角色原型、装备原型、技能原型进行 Build 装配与批量混合测试。</div>
+      </div>
+      <div class="asset-layout">
+        <div>
+          <div class="mini-grid" id="assetStats"></div>
+          <div class="asset-actions">
+            <button id="sampleAssetBtn">刷新资产抽样</button>
+            <button id="assembleBuildBtn" class="secondary">生成示例 Build</button>
+            <button id="runBatchBtn" class="secondary">执行批量混合测试</button>
+            <select id="assetSampleType">
+              <option value="characters">角色样本</option>
+              <option value="equipments">装备样本</option>
+              <option value="skills">技能样本</option>
+            </select>
+          </div>
+          <div class="list-card">
+            <h3>资产抽样预览</h3>
+            <ul class="asset-list" id="assetSampleList"></ul>
+          </div>
+        </div>
+        <div>
+          <div class="build-preview" id="buildPreview"></div>
+          <div style="height: 12px;"></div>
+          <div class="batch-results" id="batchSummary"></div>
+        </div>
+      </div>
+      <div class="visual-tabs">
+        <button id="showSingleBattleBtn" class="secondary active">单场多人战斗详情</button>
+        <button id="showBatchViewBtn" class="ghost">批量测试摘要视图</button>
+      </div>
+      <div id="singleBattleView" class="visual-view active">
+        <div class="battle-controls">
+          <select id="battleScenarioSelect"></select>
+          <button id="runSingleBattleBtn" class="secondary">执行单次多人战斗</button>
+        </div>
+        <div class="visual-layout">
+          <div>
+            <div class="battle-summary-grid" id="battleSummaryGrid"></div>
+            <div class="battle-board" id="battleBoard"></div>
+          </div>
+          <div class="log-panel">
+            <h3>回合推进 / 关键事件</h3>
+            <div class="event-log" id="battleLog"></div>
+          </div>
+        </div>
+        <div style="height: 14px;"></div>
+        <div class="detail-columns">
+          <div class="chart-panel">
+            <h3>多人战斗结果图表</h3>
+            <div class="chart-list" id="battleCharts"></div>
+          </div>
+          <div class="detail-panel" id="battleDetailPanel"></div>
+        </div>
+      </div>
+      <div id="batchBattleView" class="visual-view">
+        <div class="chart-panel" id="batchVisualSummary"></div>
+        <div class="batch-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>批次</th>
+                <th>目标</th>
+                <th>样本数</th>
+                <th>A 侧胜率</th>
+                <th>平均时长</th>
+                <th>平均输出</th>
+                <th>平均治疗</th>
+                <th>平均控制</th>
+                <th>代表 Build</th>
+              </tr>
+            </thead>
+            <tbody id="batchResultBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>测试结果明细</h2>
+      <div style="overflow:auto; max-height: 70vh;">
+        <table>
+          <thead>
+            <tr>
+              <th>测试编号</th>
+              <th>层级</th>
+              <th>目标</th>
+              <th>输入</th>
+              <th>Expected</th>
+              <th>Actual</th>
+              <th>Tolerance</th>
+              <th>是否通过</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody id="resultBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const floorMin = (value, minValue) => Math.max(minValue, Math.floor(value));
+    const round = (value, digits = 4) => Number(value.toFixed(digits));
+
+    const LEVEL_BRACKETS = [1, 10, 30, 60, 100];
+    const GROWTH_PLAN_A = {
+      1: 0.55,
+      10: 0.78,
+      30: 1.0,
+      60: 1.45,
+      100: 1.95
+    };
+
+    const stagePreset = {
+      0: { damage: 1.0, taken: 1.0, control_out: 1.0, control_in: 1.0, heal_shield: 1.0 },
+      1: { damage: 1.25, taken: 0.8, control_out: 0.85, control_in: 0.85, heal_shield: 1.1 },
+      2: { damage: 1.7, taken: 0.45, control_out: 0.45, control_in: 0.35, heal_shield: 1.18 },
+      3: { damage: 2.4, taken: 0.2, control_out: 0.1, control_in: 0.1, heal_shield: 1.25 }
+    };
+
+    const BURST_GAIN_MAP = { basicHit: 12, skillUse: 8, takeDamage: 6, kill: 20, crit: 6 };
+    const ROLE_ARCHETYPES = [
+      {
+        key: "bulwark",
+        roleAxis: "tank",
+        aiProfile: "pressure_frontline",
+        attributeWeights: { STR: 1.3, AGI: 0.6, INT: 0.3, SPI: 1.0, CHA: 0.4, LUK: 0.4 },
+        derivedBias: ["hp", "armor", "frontline"],
+        tags: ["frontline", "survive", "steady"],
+        skillTags: ["strike", "guard", "taunt"],
+        preferredScaling: ["PATK", "HEALP"]
+      },
+      {
+        key: "duelist",
+        roleAxis: "burst",
+        aiProfile: "execute_lowest",
+        attributeWeights: { STR: 1.0, AGI: 1.3, INT: 0.4, SPI: 0.4, CHA: 0.3, LUK: 1.0 },
+        derivedBias: ["speed", "crit", "single_target"],
+        tags: ["melee", "tempo", "finisher"],
+        skillTags: ["strike", "crit", "execute"],
+        preferredScaling: ["PATK"]
+      },
+      {
+        key: "arcanist",
+        roleAxis: "burst",
+        aiProfile: "mana_burst",
+        attributeWeights: { STR: 0.2, AGI: 0.5, INT: 1.4, SPI: 0.9, CHA: 0.3, LUK: 0.5 },
+        derivedBias: ["matk", "burst", "aoe"],
+        tags: ["caster", "nuke", "mana"],
+        skillTags: ["arcane", "burst", "focus"],
+        preferredScaling: ["MATK"]
+      },
+      {
+        key: "controller",
+        roleAxis: "control",
+        aiProfile: "disable_priority",
+        attributeWeights: { STR: 0.3, AGI: 0.7, INT: 1.1, SPI: 1.2, CHA: 0.5, LUK: 0.5 },
+        derivedBias: ["status", "speed", "tempo"],
+        tags: ["control", "caster", "debuff"],
+        skillTags: ["hex", "control", "rupture"],
+        preferredScaling: ["MATK", "HEALP"]
+      },
+      {
+        key: "oracle",
+        roleAxis: "support",
+        aiProfile: "heal_support",
+        attributeWeights: { STR: 0.4, AGI: 0.4, INT: 0.8, SPI: 1.4, CHA: 1.0, LUK: 0.4 },
+        derivedBias: ["heal", "shield", "aura"],
+        tags: ["support", "heal", "shield"],
+        skillTags: ["heal", "shield", "aura"],
+        preferredScaling: ["HEALP", "MATK"]
+      },
+      {
+        key: "marshal",
+        roleAxis: "support",
+        aiProfile: "summon_support",
+        attributeWeights: { STR: 0.5, AGI: 0.5, INT: 0.7, SPI: 1.0, CHA: 1.5, LUK: 0.5 },
+        derivedBias: ["lead", "summon", "aura"],
+        tags: ["support", "leader", "summon"],
+        skillTags: ["aura", "summon", "heal"],
+        preferredScaling: ["HEALP", "PATK"]
+      },
+      {
+        key: "ranger",
+        roleAxis: "sustain_dps",
+        aiProfile: "tempo_cycle",
+        attributeWeights: { STR: 0.8, AGI: 1.2, INT: 0.5, SPI: 0.6, CHA: 0.3, LUK: 0.8 },
+        derivedBias: ["speed", "hit", "sustain_dps"],
+        tags: ["ranged", "tempo", "stable"],
+        skillTags: ["strike", "tempo", "focus"],
+        preferredScaling: ["PATK"]
+      },
+      {
+        key: "trickster",
+        roleAxis: "highVariance",
+        aiProfile: "crit_cycle",
+        attributeWeights: { STR: 0.6, AGI: 1.0, INT: 0.4, SPI: 0.4, CHA: 0.3, LUK: 1.5 },
+        derivedBias: ["crit", "luck", "variance"],
+        tags: ["crit", "variance", "finisher"],
+        skillTags: ["crit", "strike", "execute"],
+        preferredScaling: ["PATK"]
+      },
+      {
+        key: "hexblade",
+        roleAxis: "hybrid",
+        aiProfile: "hybrid_pressure",
+        attributeWeights: { STR: 0.8, AGI: 0.7, INT: 0.9, SPI: 0.8, CHA: 0.4, LUK: 0.6 },
+        derivedBias: ["hybrid", "rupture", "pressure"],
+        tags: ["hybrid", "midrange", "pressure"],
+        skillTags: ["rupture", "arcane", "strike"],
+        preferredScaling: ["PATK", "MATK"]
+      },
+      {
+        key: "warden",
+        roleAxis: "antiBoss",
+        aiProfile: "boss_breaker",
+        attributeWeights: { STR: 1.1, AGI: 0.6, INT: 0.5, SPI: 1.0, CHA: 0.5, LUK: 0.3 },
+        derivedBias: ["boss_break", "durable", "stable"],
+        tags: ["boss", "frontline", "breaker"],
+        skillTags: ["guard", "execute", "rupture"],
+        preferredScaling: ["PATK", "HEALP"]
+      }
+    ];
+    const EQUIPMENT_THEMES = [
+      { key: "iron", name: "铁壁", slot: "weapon", statFocus: { WeaponATK: 22, ArmorBonus: 6 }, percentKey: "damage", percentValue: 0.02, tags: ["physical", "steady"] },
+      { key: "wind", name: "逐风", slot: "weapon", statFocus: { WeaponATK: 16, SpeedBonus: 12, HitBonus: 6 }, percentKey: "speed", percentValue: 0.03, tags: ["tempo", "agile"] },
+      { key: "ember", name: "炎纹", slot: "weapon", statFocus: { WeaponMATK: 22, FlatMATKBonus: 8 }, percentKey: "burst", percentValue: 0.03, tags: ["magic", "burst"] },
+      { key: "mist", name: "雾契", slot: "weapon", statFocus: { WeaponMATK: 14, StatusHitBonus: 16, SpeedBonus: 6 }, percentKey: "control", percentValue: 0.03, tags: ["control", "status"] },
+      { key: "guard", name: "玄甲", slot: "armor", statFocus: { ArmorBonus: 26, FlatHPBonus: 90 }, percentKey: "survival", percentValue: 0.04, tags: ["tank", "survival"] },
+      { key: "ward", name: "灵障", slot: "armor", statFocus: { ResistBonus: 26, FlatSPBonus: 70 }, percentKey: "resist", percentValue: 0.04, tags: ["magic", "resist"] },
+      { key: "pulse", name: "回响", slot: "accessory", statFocus: { HealBonus: 24, RegenBonus: 8 }, percentKey: "heal", percentValue: 0.04, tags: ["support", "heal"] },
+      { key: "crown", name: "统御", slot: "accessory", statFocus: { LeadBonus: 26, FlatSPBonus: 40 }, percentKey: "aura", percentValue: 0.05, tags: ["lead", "summon"] },
+      { key: "fang", name: "猎魇", slot: "accessory", statFocus: { CritBonus: 10, CritDamageBonus: 18 }, percentKey: "crit", percentValue: 0.05, tags: ["crit", "execute"] },
+      { key: "veil", name: "潜影", slot: "accessory", statFocus: { EvadeBonus: 12, SpeedBonus: 8, LUK: 8 }, percentKey: "evasion", percentValue: 0.04, tags: ["tempo", "variance"] }
+    ];
+    const SKILL_FAMILIES = [
+      { key: "strike", name: "裂锋", type: "damage", damageType: "physical", scaling: "PATK", baseRates: [1.05, 1.3, 1.7, 2.05, 2.4], baseCost: [0, 8, 16, 24, 34], tags: ["strike", "single"] },
+      { key: "arcane", name: "奥灼", type: "damage", damageType: "magical", scaling: "MATK", baseRates: [1.1, 1.45, 1.85, 2.2, 2.55], baseCost: [6, 12, 20, 30, 42], tags: ["magic", "burst"] },
+      { key: "crit", name: "绝意", type: "damage", damageType: "physical", scaling: "PATK", baseRates: [1.0, 1.25, 1.65, 2.0, 2.35], baseCost: [4, 10, 18, 28, 36], tags: ["crit", "execute"], extraCrit: [8, 12, 18, 24, 30], extraCritDamage: [10, 14, 18, 24, 30] },
+      { key: "focus", name: "聚界", type: "damage", damageType: "magical", scaling: "MATK", baseRates: [1.2, 1.6, 2.0, 2.4, 2.85], baseCost: [8, 16, 26, 36, 50], tags: ["burst", "focus"], burstCost: [0, 0, 0, 50, 100] },
+      { key: "hex", name: "缚咒", type: "control", baseChance: [30, 38, 46, 56, 66], baseCost: [10, 16, 24, 32, 40], tags: ["control", "hex"], duration: [1, 1, 1, 2, 2] },
+      { key: "guard", name: "护域", type: "healShield", healRates: [0.55, 0.75, 0.95, 1.15, 1.35], shieldRates: [0.7, 0.95, 1.2, 1.45, 1.75], baseCost: [8, 14, 22, 30, 40], tags: ["shield", "guard"] },
+      { key: "heal", name: "灵愈", type: "heal", baseRates: [0.85, 1.05, 1.3, 1.55, 1.85], baseCost: [6, 12, 20, 28, 36], tags: ["heal", "support"] },
+      { key: "aura", name: "战旗", type: "buff", auraBoost: [0.03, 0.04, 0.05, 0.06, 0.08], baseCost: [8, 12, 18, 24, 34], tags: ["aura", "support"], duration: [2, 2, 3, 3, 4] },
+      { key: "summon", name: "御灵", type: "summon", baseCost: [18, 22, 28, 36, 48], tags: ["summon", "support"] },
+      { key: "rupture", name: "蚀裂", type: "damage", damageType: "magical", scaling: "MATK", baseRates: [1.0, 1.25, 1.55, 1.9, 2.25], baseCost: [6, 12, 18, 28, 38], tags: ["rupture", "pressure"], extraCrit: [0, 4, 8, 12, 16], extraCritDamage: [0, 6, 10, 16, 24] }
+    ];
+
+    function getStageMultiplier(realmGap) {
+      const absGap = Math.min(3, Math.abs(realmGap || 0));
+      const preset = stagePreset[absGap];
+      if ((realmGap || 0) === 0) return { ...preset };
+      return realmGap > 0
+        ? { ...preset }
+        : {
+            damage: preset.taken,
+            taken: preset.damage,
+            control_out: preset.control_in,
+            control_in: preset.control_out,
+            heal_shield: 1 / preset.heal_shield
+          };
+    }
+
+    function derivedStats(base) {
+      const u = {
+        Level: 1,
+        STR: 0, AGI: 0, INT: 0, SPI: 0, CHA: 0, LUK: 0,
+        FlatHPBonus: 0, FlatSPBonus: 0,
+        WeaponATK: 0, FlatPATKBonus: 0,
+        WeaponMATK: 0, FlatMATKBonus: 0,
+        ArmorBonus: 0, ResistBonus: 0, SpeedBonus: 0,
+        HitBonus: 0, EvadeBonus: 0,
+        CritBonus: 0, CritDamageBonus: 0,
+        StatusHitBonus: 0, StatusResistBonus: 0,
+        HealBonus: 0, LeadBonus: 0,
+        RegenBonus: 0
+      };
+      Object.assign(u, base || {});
+      const out = {
+        MaxHP: 100 + u.STR * 9 + u.SPI * 5 + u.Level * 4 + u.FlatHPBonus,
+        MaxSP: 40 + u.INT * 4 + u.SPI * 8 + u.Level * 2 + u.FlatSPBonus,
+        PATK: 10 + u.STR * 2.6 + u.AGI * 0.7 + u.Level * 0.5 + u.WeaponATK + u.FlatPATKBonus,
+        MATK: 10 + u.INT * 2.6 + u.SPI * 0.8 + u.Level * 0.5 + u.WeaponMATK + u.FlatMATKBonus,
+        PDEF: 5 + u.STR * 1.2 + u.AGI * 0.5 + u.Level * 0.3 + u.ArmorBonus,
+        MDEF: 5 + u.SPI * 1.6 + u.INT * 0.6 + u.Level * 0.3 + u.ResistBonus,
+        SPD: 80 + u.AGI * 2.2 + u.SPI * 0.3 + u.LUK * 0.2 + u.SpeedBonus,
+        HIT: 100 + u.AGI * 1.0 + u.INT * 0.4 + u.Level * 0.2 + u.HitBonus,
+        EVA: u.AGI * 0.9 + u.LUK * 0.6 + u.Level * 0.1 + u.EvadeBonus,
+        CRIT: 5 + u.AGI * 0.08 + u.LUK * 0.18 + u.CritBonus,
+        CDMG: 150 + u.STR * 0.12 + u.INT * 0.12 + u.LUK * 0.10 + u.CritDamageBonus,
+        AACC: 100 + u.INT * 0.8 + u.SPI * 0.8 + u.CHA * 0.6 + u.LUK * 0.2 + u.StatusHitBonus,
+        ARES: 100 + u.SPI * 1.2 + u.CHA * 0.5 + u.LUK * 0.3 + u.StatusResistBonus,
+        HEALP: u.SPI * 1.8 + u.INT * 0.7 + u.CHA * 0.7 + u.HealBonus,
+        LEAD: u.CHA * 1.8 + u.SPI * 0.6 + u.LUK * 0.2 + u.LeadBonus
+      };
+      out.TeamAuraBonus = 1 + Math.min(0.20, out.LEAD / 1000);
+      out.SummonInheritance = 0.5 + Math.min(0.35, out.LEAD / 1000);
+      out.SPRegenPerAction = 4 + u.SPI * 0.15 + u.RegenBonus;
+      return out;
+    }
+
+    function effectiveSPD(rawSPD, softCap = false) {
+      if (!softCap) return rawSPD;
+      return Math.min(220, rawSPD) + Math.max(0, rawSPD - 220) * 0.5;
+    }
+
+    function hitChance(hit, eva) {
+      return clamp(90 + hit - eva, 72, 98);
+    }
+
+    function statusChance(baseChance, aacc, ares, realmGap = 0) {
+      const mul = getStageMultiplier(realmGap);
+      const raw = baseChance * Math.sqrt(Math.max(0.0001, aacc) / Math.max(0.0001, ares)) * mul.control_out * mul.control_in;
+      return clamp(raw, 5, 85);
+    }
+
+    function computeDamage({ atk, def, skillRate = 1, randomFactor = 1, finalBonus = 1, critMultiplier = 1, realmGap = 0 }) {
+      const mul = getStageMultiplier(realmGap);
+      const mitigated = Math.max(0, atk * skillRate - def);
+      const raw = mitigated * randomFactor * finalBonus * critMultiplier * mul.damage * mul.taken;
+      return floorMin(raw, 1);
+    }
+
+    function computeHeal({ healPower, skillRate = 1, finalBonus = 1, realmGap = 0 }) {
+      const mul = getStageMultiplier(realmGap);
+      return Math.max(0, Math.floor(healPower * skillRate * finalBonus * mul.heal_shield));
+    }
+
+    function computeShield({ healPower, skillRate = 1, flatShield = 0, finalBonus = 1, realmGap = 0 }) {
+      const mul = getStageMultiplier(realmGap);
+      return Math.max(0, Math.floor((healPower * skillRate + flatShield) * finalBonus * mul.heal_shield));
+    }
+
+    function createShieldState() {
+      return [];
+    }
+
+    function applyShield(shields, sourceId, value) {
+      const normalized = Math.max(0, Math.floor(value));
+      const existingIndex = shields.findIndex(item => item.sourceId === sourceId);
+      if (existingIndex >= 0) {
+        shields[existingIndex] = { sourceId, value: normalized, remainingSelfActions: 3 };
+        return shields;
+      }
+      shields.push({ sourceId, value: normalized, remainingSelfActions: 3 });
+      shields.sort((a, b) => b.value - a.value);
+      while (shields.length > 3) shields.pop();
+      return shields;
+    }
+
+    function tickShieldSelfAction(shields) {
+      for (const shield of shields) shield.remainingSelfActions -= 1;
+      return shields.filter(shield => shield.remainingSelfActions > 0 && shield.value > 0);
+    }
+
+    function totalShield(shields) {
+      return shields.reduce((sum, item) => sum + item.value, 0);
+    }
+
+    function applyDamageToShield(shields, damage) {
+      let remain = damage;
+      for (const shield of shields) {
+        if (remain <= 0) break;
+        const absorbed = Math.min(shield.value, remain);
+        shield.value -= absorbed;
+        remain -= absorbed;
+      }
+      return { remainingDamage: remain, shields: shields.filter(item => item.value > 0 && item.remainingSelfActions > 0) };
+    }
+
+    function bossBonuses(enemyCountAdvantage) {
+      return {
+        hpBonus: 1 + 0.35 * enemyCountAdvantage,
+        statusResistBonus: 1 + 0.20 * enemyCountAdvantage,
+        actionGaugeBonus: 1 + 0.15 * enemyCountAdvantage
+      };
+    }
+
+    function simulateATB({ combatants, ticks, useSoftCap = false }) {
+      const state = combatants.map(unit => ({
+        name: unit.name,
+        gauge: 0,
+        actionCount: 0,
+        rawSPD: unit.spd,
+        spd: effectiveSPD(unit.spd, useSoftCap) * (unit.gaugeBonus || 1)
+      }));
+      for (let tick = 1; tick <= ticks; tick += 1) {
+        for (const unit of state) {
+          unit.gauge += unit.spd;
+          while (unit.gauge >= 1000) {
+            unit.gauge -= 1000;
+            unit.actionCount += 1;
+          }
+        }
+      }
+      return state;
+    }
+
+    function simulateSPCycle({ initialSP, spRegenPerAction, skillCosts }) {
+      let sp = initialSP;
+      const history = [];
+      for (let i = 0; i < skillCosts.length; i += 1) {
+        const cost = skillCosts[i];
+        const couldUseSkill = sp >= cost;
+        if (couldUseSkill) sp -= cost;
+        sp = Math.min(initialSP, sp + spRegenPerAction);
+        history.push({ index: i + 1, cost, usedSkill: couldUseSkill, spAfterAction: round(sp, 2) });
+      }
+      return { finalSP: round(sp, 2), history };
+    }
+
+    function simulateBurst(events) {
+      let burst = 0;
+      const history = [];
+      for (const event of events) {
+        if (event.type === "spend") {
+          burst = Math.max(0, burst - event.value);
+        } else {
+          burst = Math.min(100, burst + (BURST_GAIN_MAP[event.type] || 0));
+        }
+        history.push({ event: event.type, burst });
+      }
+      return { burst, history };
+    }
+
+    function stringify(obj) {
+      return JSON.stringify(obj, null, 2);
+    }
+
+    function approxEqual(actual, expected, tolerance) {
+      if (typeof expected === "boolean") return actual === expected;
+      if (typeof expected === "string") return String(actual) === expected;
+      return Math.abs(actual - expected) <= tolerance;
+    }
+
+    function row(layer, id, goal, input, expected, actual, tolerance, pass, note) {
+      return { layer, id, goal, input, expected, actual, tolerance, pass, note };
+    }
+
+    function createCharacterPrototypes() {
+      const levelBrackets = [10, 30, 60, 100];
+      const realms = [0, 0, 1, 2, 3];
+      const variants = ["锋", "岚", "星", "阙", "影", "曜", "霜", "岑", "烬", "潮"];
+      const result = [];
+      for (let i = 0; i < 100; i += 1) {
+        const archetype = ROLE_ARCHETYPES[i % ROLE_ARCHETYPES.length];
+        const tier = Math.floor(i / 20) + 1;
+        const levelBracket = levelBrackets[i % levelBrackets.length];
+        const realm = realms[tier - 1];
+        const variant = variants[Math.floor(i / ROLE_ARCHETYPES.length)] || `型${i + 1}`;
+        const baseSeed = 44 + tier * 10 + (i % 5) * 4;
+        const weights = archetype.attributeWeights;
+        const attributeProfile = {
+          STR: Math.round(baseSeed * weights.STR + (i % 3) * 3),
+          AGI: Math.round(baseSeed * weights.AGI + (i % 4) * 2),
+          INT: Math.round(baseSeed * weights.INT + ((i + 1) % 5) * 2),
+          SPI: Math.round(baseSeed * weights.SPI + ((i + 2) % 4) * 3),
+          CHA: Math.round(baseSeed * weights.CHA + ((i + 3) % 3) * 4),
+          LUK: Math.round(baseSeed * weights.LUK + ((i + 4) % 4) * 2),
+          FlatHPBonus: tier * 40,
+          FlatSPBonus: tier * 24
+        };
+        result.push({
+          id: `C${String(i + 1).padStart(3, "0")}`,
+          name: `${variant}${archetype.name || archetype.key}-${i + 1}`,
+          roleAxis: archetype.roleAxis,
+          realm,
+          tier,
+          levelBracket,
+          growthPlan: "A",
+          attributeProfile,
+          derivedBias: archetype.derivedBias,
+          equipmentSlots: ["weapon", "armor", "accessory", "accessory"],
+          skillLoadoutRules: {
+            preferredTags: archetype.skillTags,
+            maxTier: Math.min(5, tier + 1),
+            maxSameTag: 2
+          },
+          aiProfile: archetype.aiProfile,
+          tags: [...archetype.tags, `tier-${tier}`, `realm-${realm}`],
+          samplingWeight: 1 + (tier - 1) * 0.15,
+          expectedStrengthBand: `${tier}.${(i % 5) + 1}`,
+          archetypeKey: archetype.key,
+          preferredScaling: archetype.preferredScaling
+        });
+      }
+      return result;
+    }
+
+    function createEquipmentPrototypes() {
+      const rarities = ["I", "II", "III", "IV", "V"];
+      const result = [];
+      for (let i = 0; i < 100; i += 1) {
+        const theme = EQUIPMENT_THEMES[i % EQUIPMENT_THEMES.length];
+        const tier = Math.floor(i / 20) + 1;
+        const rarity = rarities[tier - 1];
+        const statScale = 1 + tier * 0.22 + (i % 4) * 0.05;
+        const statMods = {};
+        Object.entries(theme.statFocus).forEach(([key, value]) => {
+          statMods[key] = Math.round(value * statScale);
+        });
+        result.push({
+          id: `E${String(i + 1).padStart(3, "0")}`,
+          name: `${theme.name}${theme.slot === "weapon" ? "兵装" : theme.slot === "armor" ? "护具" : "饰契"}-${rarity}${(i % 10) + 1}`,
+          slot: theme.slot,
+          tier,
+          realmRecommended: Math.max(0, tier - 1),
+          statMods,
+          percentMods: { [theme.percentKey]: round(theme.percentValue + tier * 0.01, 3) },
+          tags: [...theme.tags, `slot-${theme.slot}`, `tier-${tier}`],
+          rules: {
+            preferredRoleAxis: theme.tags,
+            explanation: `${theme.name}系${theme.slot}，强化 ${Object.keys(statMods).join("/")}`
+          },
+          samplingWeight: 1 + tier * 0.08,
+          themeKey: theme.key
+        });
+      }
+      return result;
+    }
+
+    function createGeneratedSkillBook() {
+      const roman = ["I", "II", "III", "IV", "V"];
+      const result = [];
+      for (let i = 0; i < 100; i += 1) {
+        const family = SKILL_FAMILIES[i % SKILL_FAMILIES.length];
+        const tier = Math.floor(i / 20) + 1;
+        const levelIndex = tier - 1;
+        const skill = {
+          id: `S${String(i + 1).padStart(3, "0")}`,
+          key: `generated_${family.key}_${String(i + 1).padStart(3, "0")}`,
+          name: `${family.name}${roman[levelIndex]}式·${(i % 10) + 1}`,
+          family: family.key,
+          tier,
+          realmRecommended: Math.max(0, tier - 1),
+          type: family.type,
+          tags: [...family.tags, `tier-${tier}`],
+          spCost: family.baseCost[levelIndex],
+          burstGain: 8,
+          samplingWeight: 1 + tier * 0.08,
+          explanation: `${family.name}系 ${roman[levelIndex]} 级技能，符合分层递增的成本与效果。`
+        };
+        if (family.type === "damage") {
+          skill.damageType = family.damageType;
+          skill.scaling = family.scaling;
+          skill.skillRate = family.baseRates[levelIndex] + (i % 2) * 0.05;
+          if (family.extraCrit) skill.extraCrit = family.extraCrit[levelIndex];
+          if (family.extraCritDamage) skill.extraCritDamage = family.extraCritDamage[levelIndex];
+          if (family.burstCost) skill.burstCost = family.burstCost[levelIndex];
+        } else if (family.type === "control") {
+          skill.baseChance = family.baseChance[levelIndex];
+          skill.duration = family.duration[levelIndex];
+        } else if (family.type === "heal") {
+          skill.skillRate = family.baseRates[levelIndex];
+        } else if (family.type === "healShield") {
+          skill.healRate = family.healRates[levelIndex];
+          skill.shieldRate = family.shieldRates[levelIndex];
+        } else if (family.type === "buff") {
+          skill.auraBoost = family.auraBoost[levelIndex];
+          skill.duration = family.duration[levelIndex];
+        }
+        result.push(skill);
+      }
+      return result;
+    }
+
+    function buildTemplates() {
+      return {
+        B1: { name: "B1纯力量重击流", Level: 30, STR: 120, AGI: 30, INT: 20, SPI: 60, CHA: 20, LUK: 20, WeaponATK: 100, ArmorBonus: 80 },
+        B2: { name: "B2力敏近战流", Level: 30, STR: 80, AGI: 95, INT: 20, SPI: 40, CHA: 20, LUK: 30, WeaponATK: 85, SpeedBonus: 10 },
+        B3: { name: "B3纯敏捷闪击流", Level: 30, STR: 35, AGI: 150, INT: 20, SPI: 35, CHA: 20, LUK: 70, WeaponATK: 65, EvadeBonus: 20, SpeedBonus: 25 },
+        B4: { name: "B4智力爆发术法流", Level: 30, STR: 20, AGI: 30, INT: 140, SPI: 70, CHA: 20, LUK: 20, WeaponMATK: 120, FlatMATKBonus: 30 },
+        B5: { name: "B5智精控制流", Level: 30, STR: 20, AGI: 40, INT: 95, SPI: 120, CHA: 35, LUK: 20, WeaponMATK: 80, StatusHitBonus: 30, ResistBonus: 30 },
+        B6: { name: "B6纯精神回复流", Level: 30, STR: 30, AGI: 30, INT: 60, SPI: 150, CHA: 70, LUK: 20, HealBonus: 120, ResistBonus: 50 },
+        B7: { name: "B7魅精神统御流", Level: 30, STR: 25, AGI: 35, INT: 50, SPI: 110, CHA: 140, LUK: 30, HealBonus: 40, LeadBonus: 40 },
+        B8: { name: "B8幸运暴击流", Level: 30, STR: 50, AGI: 110, INT: 30, SPI: 35, CHA: 20, LUK: 150, WeaponATK: 75, CritBonus: 10, CritDamageBonus: 25 },
+        B9: { name: "B9平衡六边形流", Level: 30, STR: 70, AGI: 70, INT: 70, SPI: 70, CHA: 70, LUK: 70, WeaponATK: 60, WeaponMATK: 60 }
+      };
+    }
+
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function seededRng(seed) {
+      let state = (seed >>> 0) || 1;
+      return function next() {
+        state = (1664525 * state + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
+    }
+
+    function pickLowestHp(units) {
+      return units.filter(unit => unit.hp > 0).sort((a, b) => a.hp - b.hp)[0] || null;
+    }
+
+    function pickHighestThreat(units) {
+      return units.filter(unit => unit.hp > 0).sort((a, b) => (b.stats.PATK + b.stats.MATK) - (a.stats.PATK + a.stats.MATK))[0] || null;
+    }
+
+    function pickRandomAlive(units, rng) {
+      const alive = units.filter(unit => unit.hp > 0);
+      if (!alive.length) return null;
+      return alive[Math.floor(rng() * alive.length)];
+    }
+
+    function getGrowthScaledBuild(template, level) {
+      const factor = GROWTH_PLAN_A[level] || 1;
+      const scaled = clone(template);
+      scaled.Level = level;
+      ["STR", "AGI", "INT", "SPI", "CHA", "LUK", "WeaponATK", "WeaponMATK", "FlatPATKBonus", "FlatMATKBonus", "ArmorBonus", "ResistBonus", "SpeedBonus", "HitBonus", "EvadeBonus", "CritBonus", "CritDamageBonus", "StatusHitBonus", "StatusResistBonus", "HealBonus", "LeadBonus", "RegenBonus", "FlatHPBonus", "FlatSPBonus"].forEach(key => {
+        scaled[key] = round((template[key] || 0) * factor, 2);
+      });
+      scaled.name = `${template.name}-Lv${level}`;
+      scaled.buildId = template.buildId || "";
+      return scaled;
+    }
+
+    function createSkillBook() {
+      return {
+        basicStrike: { key: "basicStrike", type: "damage", damageType: "physical", scaling: "PATK", skillRate: 1.05, spCost: 0, burstGain: 12 },
+        heavySmash: { key: "heavySmash", type: "damage", damageType: "physical", scaling: "PATK", skillRate: 1.7, spCost: 18, burstGain: 8 },
+        quickSlash: { key: "quickSlash", type: "damage", damageType: "physical", scaling: "PATK", skillRate: 1.2, spCost: 10, burstGain: 8 },
+        arcaneBlast: { key: "arcaneBlast", type: "damage", damageType: "magical", scaling: "MATK", skillRate: 1.55, spCost: 20, burstGain: 8 },
+        focusBurst: { key: "focusBurst", type: "damage", damageType: "magical", scaling: "MATK", skillRate: 2.35, spCost: 38, burstGain: 8, burstCost: 100 },
+        controlHex: { key: "controlHex", type: "control", baseChance: 42, duration: 1, spCost: 18, burstGain: 8 },
+        suppressWave: { key: "suppressWave", type: "control", baseChance: 55, duration: 1, spCost: 30, burstGain: 8, burstCost: 100 },
+        healPrayer: { key: "healPrayer", type: "heal", skillRate: 1.45, spCost: 16, burstGain: 8 },
+        sanctuary: { key: "sanctuary", type: "healShield", healRate: 1.0, shieldRate: 1.2, spCost: 26, burstGain: 8 },
+        tacticalAura: { key: "tacticalAura", type: "buff", spCost: 12, burstGain: 8, auraBoost: 0.06, duration: 3 },
+        summonGuard: { key: "summonGuard", type: "summon", spCost: 24, burstGain: 8 },
+        critGamble: { key: "critGamble", type: "damage", damageType: "physical", scaling: "PATK", skillRate: 1.35, spCost: 14, burstGain: 8, extraCrit: 18, extraCritDamage: 22 },
+        burstFinisher: { key: "burstFinisher", type: "damage", damageType: "physical", scaling: "PATK", skillRate: 2.1, spCost: 24, burstGain: 8, burstCost: 100, extraCrit: 25, extraCritDamage: 30 }
+      };
+    }
+
+    const SKILLS = createSkillBook();
+    const GENERATED_CHARACTERS = createCharacterPrototypes();
+    const GENERATED_EQUIPMENTS = createEquipmentPrototypes();
+    const GENERATED_SKILLS = createGeneratedSkillBook();
+    const GENERATED_SKILL_MAP = GENERATED_SKILLS.reduce((acc, skill) => {
+      acc[skill.id] = skill;
+      acc[skill.key] = skill;
+      return acc;
+    }, {});
+
+    function mergeNumericStats(base, addition) {
+      const result = { ...base };
+      Object.entries(addition || {}).forEach(([key, value]) => {
+        result[key] = (result[key] || 0) + value;
+      });
+      return result;
+    }
+
+    function applyEquipmentToProfile(profile, equipments) {
+      const merged = { ...profile };
+      equipments.forEach(item => {
+        Object.entries(item.statMods || {}).forEach(([key, value]) => {
+          merged[key] = (merged[key] || 0) + value;
+        });
+      });
+      return merged;
+    }
+
+    function chooseEquipmentSet(character) {
+      const preferred = new Set([character.roleAxis, ...(character.tags || [])]);
+      const bySlot = { weapon: [], armor: [], accessory: [] };
+      GENERATED_EQUIPMENTS.forEach(item => {
+        const score = item.tags.reduce((sum, tag) => sum + (preferred.has(tag) ? 2 : 0), 0) + (item.realmRecommended <= character.realm ? 1 : 0);
+        bySlot[item.slot].push({ item, score });
+      });
+      Object.keys(bySlot).forEach(slot => bySlot[slot].sort((a, b) => b.score - a.score || b.item.tier - a.item.tier));
+      return [bySlot.weapon[0].item, bySlot.armor[0].item, bySlot.accessory[0].item, bySlot.accessory[1].item];
+    }
+
+    function chooseSkillLoadout(character) {
+      const preferredTags = new Set(character.skillLoadoutRules.preferredTags || []);
+      const candidates = GENERATED_SKILLS
+        .filter(skill => skill.tier <= character.skillLoadoutRules.maxTier)
+        .map(skill => ({
+          skill,
+          score: skill.tags.reduce((sum, tag) => sum + (preferredTags.has(tag) ? 3 : 0), 0) + (skill.realmRecommended <= character.realm ? 1 : 0)
+        }))
+        .sort((a, b) => b.score - a.score || b.skill.tier - a.skill.tier);
+      const picked = [];
+      const tagCounter = {};
+      for (const candidate of candidates) {
+        const keyTag = candidate.skill.tags[0];
+        if ((tagCounter[keyTag] || 0) >= character.skillLoadoutRules.maxSameTag) continue;
+        picked.push(candidate.skill);
+        tagCounter[keyTag] = (tagCounter[keyTag] || 0) + 1;
+        if (picked.length >= 4) break;
+      }
+      return picked;
+    }
+
+    function deriveBehaviorFromSkills(loadout) {
+      const has = type => loadout.some(skill => skill.type === type);
+      const tags = loadout.flatMap(skill => skill.tags || []);
+      if (tags.includes("summon")) return "summon_support";
+      if (tags.includes("control")) return "disable_priority";
+      if (has("heal") || has("healShield")) return "heal_support";
+      if (tags.includes("crit")) return "crit_cycle";
+      if (tags.includes("burst") || tags.includes("focus")) return "mana_burst";
+      return "tempo_cycle";
+    }
+
+    function assembleGeneratedBuild(characterId, options = {}) {
+      const character = GENERATED_CHARACTERS.find(item => item.id === characterId) || GENERATED_CHARACTERS[0];
+      const level = options.level || character.levelBracket;
+      const equipments = chooseEquipmentSet(character);
+      const skillLoadout = chooseSkillLoadout(character);
+      const numericProfile = {
+        Level: level,
+        ...character.attributeProfile
+      };
+      const equippedProfile = applyEquipmentToProfile(numericProfile, equipments);
+      const stats = derivedStats(equippedProfile);
+      return {
+        id: `GB-${character.id}`,
+        name: `${character.name}-Build`,
+        characterId: character.id,
+        roleAxis: character.roleAxis,
+        realm: character.realm,
+        level,
+        equipmentIds: equipments.map(item => item.id),
+        skillIds: skillLoadout.map(item => item.id),
+        numericProfile: equippedProfile,
+        stats,
+        aiProfile: deriveBehaviorFromSkills(skillLoadout),
+        sourceCharacter: character,
+        equipments,
+        skills: skillLoadout
+      };
+    }
+
+    function createBehavior(unit) {
+      const id = unit.buildId;
+      if (id === "B1") {
+        return {
+          chooseAction(self) {
+            if (self.burst >= 100 && self.sp >= SKILLS.heavySmash.spCost) return { skill: SKILLS.heavySmash, mode: "burst-window" };
+            if (self.sp >= SKILLS.heavySmash.spCost) return { skill: SKILLS.heavySmash, mode: "pressure" };
+            return { skill: SKILLS.basicStrike, mode: "fallback" };
+          }
+        };
+      }
+      if (id === "B3") {
+        return {
+          chooseAction(self) {
+            if (self.sp >= SKILLS.quickSlash.spCost) return { skill: SKILLS.quickSlash, mode: "tempo" };
+            return { skill: SKILLS.basicStrike, mode: "basic" };
+          }
+        };
+      }
+      if (id === "B4") {
+        return {
+          chooseAction(self) {
+            if (self.burst >= 100 && self.sp >= SKILLS.focusBurst.spCost) return { skill: SKILLS.focusBurst, mode: "focusBurst" };
+            if (self.sp >= SKILLS.arcaneBlast.spCost) return { skill: SKILLS.arcaneBlast, mode: "mana-cycle" };
+            return { skill: SKILLS.basicStrike, mode: "wand-tap" };
+          }
+        };
+      }
+      if (id === "B5") {
+        return {
+          chooseAction(self, allies, enemies) {
+            const uncontrolled = enemies.filter(unit => unit.hp > 0 && unit.controlled <= 0);
+            if (self.burst >= 100 && self.sp >= SKILLS.suppressWave.spCost && uncontrolled.length >= 2) {
+              return { skill: SKILLS.suppressWave, target: uncontrolled[0], mode: "aoe-control" };
+            }
+            if (self.sp >= SKILLS.controlHex.spCost && uncontrolled.length) {
+              return { skill: SKILLS.controlHex, target: pickHighestThreat(uncontrolled), mode: "single-control" };
+            }
+            const focus = pickHighestThreat(enemies.filter(unit => unit.hp > 0));
+            return { skill: SKILLS.arcaneBlast, target: focus, mode: "damage-fill" };
+          }
+        };
+      }
+      if (id === "B6") {
+        return {
+          chooseAction(self, allies) {
+            const lowest = pickLowestHp(allies);
+            const hpRatio = lowest ? lowest.hp / lowest.maxHp : 1;
+            if (self.sp >= SKILLS.sanctuary.spCost && hpRatio < 0.55) return { skill: SKILLS.sanctuary, target: lowest, mode: "stabilize" };
+            if (self.sp >= SKILLS.healPrayer.spCost && hpRatio < 0.8) return { skill: SKILLS.healPrayer, target: lowest, mode: "heal" };
+            return { skill: SKILLS.basicStrike, mode: "downtime" };
+          }
+        };
+      }
+      if (id === "B7") {
+        return {
+          chooseAction(self, allies, enemies) {
+            if (!self.auraBuffTurns && self.sp >= SKILLS.tacticalAura.spCost) return { skill: SKILLS.tacticalAura, mode: "aura-open" };
+            if (!self.summon || self.summon.hp <= 0) {
+              if (self.sp >= SKILLS.summonGuard.spCost) return { skill: SKILLS.summonGuard, mode: "summon" };
+            }
+            const lowest = pickLowestHp(allies);
+            if (lowest && lowest.hp / lowest.maxHp < 0.7 && self.sp >= SKILLS.healPrayer.spCost) {
+              return { skill: SKILLS.healPrayer, target: lowest, mode: "support-heal" };
+            }
+            return { skill: SKILLS.basicStrike, target: pickHighestThreat(enemies.filter(unit => unit.hp > 0)), mode: "support-dps" };
+          }
+        };
+      }
+      if (id === "B8") {
+        return {
+          chooseAction(self, allies, enemies) {
+            if (self.burst >= 100 && self.sp >= SKILLS.burstFinisher.spCost) return { skill: SKILLS.burstFinisher, target: pickLowestHp(enemies.filter(unit => unit.hp > 0)), mode: "crit-finisher" };
+            if (self.sp >= SKILLS.critGamble.spCost) return { skill: SKILLS.critGamble, target: pickLowestHp(enemies.filter(unit => unit.hp > 0)), mode: "crit-loop" };
+            return { skill: SKILLS.basicStrike, target: pickLowestHp(enemies.filter(unit => unit.hp > 0)), mode: "basic" };
+          }
+        };
+      }
+      if (id && String(id).startsWith("GB-")) {
+        return {
+          chooseAction(self, allies, enemies) {
+            const generatedSkills = (unit.generatedSkillKeys || []).map(key => GENERATED_SKILL_MAP[key]).filter(Boolean);
+            const healSkill = generatedSkills.find(skill => skill.type === "heal");
+            const shieldSkill = generatedSkills.find(skill => skill.type === "healShield");
+            const controlSkill = generatedSkills.find(skill => skill.type === "control");
+            const summonSkill = generatedSkills.find(skill => skill.type === "summon");
+            const damageSkills = generatedSkills.filter(skill => skill.type === "damage").sort((a, b) => (b.skillRate || 0) - (a.skillRate || 0));
+            const auraSkill = generatedSkills.find(skill => skill.type === "buff");
+            const lowest = pickLowestHp(allies);
+            const focus = pickLowestHp(enemies.filter(target => target.hp > 0)) || pickHighestThreat(enemies.filter(target => target.hp > 0));
+            if (auraSkill && !self.auraBuffTurns && self.sp >= auraSkill.spCost) return { skill: auraSkill, mode: "generated-aura" };
+            if (summonSkill && (!self.summon || self.summon.hp <= 0) && self.sp >= summonSkill.spCost) return { skill: summonSkill, mode: "generated-summon" };
+            if (shieldSkill && lowest && lowest.hp / lowest.maxHp < 0.55 && self.sp >= shieldSkill.spCost) return { skill: shieldSkill, target: lowest, mode: "generated-shield" };
+            if (healSkill && lowest && lowest.hp / lowest.maxHp < 0.75 && self.sp >= healSkill.spCost) return { skill: healSkill, target: lowest, mode: "generated-heal" };
+            if (controlSkill) {
+              const uncontrolled = enemies.filter(target => target.hp > 0 && target.controlled <= 0);
+              if (uncontrolled.length && self.sp >= controlSkill.spCost) return { skill: controlSkill, target: pickHighestThreat(uncontrolled), mode: "generated-control" };
+            }
+            const burstSkill = damageSkills.find(skill => (skill.burstCost || 0) > 0 && self.burst >= (skill.burstCost || 0) && self.sp >= skill.spCost);
+            if (burstSkill) return { skill: burstSkill, target: focus, mode: "generated-burst" };
+            const bestDamage = damageSkills.find(skill => self.sp >= skill.spCost);
+            if (bestDamage) return { skill: bestDamage, target: focus, mode: "generated-damage" };
+            return { skill: SKILLS.basicStrike, target: focus, mode: "generated-basic" };
+          }
+        };
+      }
+      return {
+        chooseAction(self, allies, enemies) {
+          const lowest = pickLowestHp(allies);
+          if (lowest && lowest.hp / lowest.maxHp < 0.65 && self.sp >= SKILLS.healPrayer.spCost) return { skill: SKILLS.healPrayer, target: lowest, mode: "balanced-heal" };
+          if (self.sp >= SKILLS.quickSlash.spCost) return { skill: SKILLS.quickSlash, target: pickHighestThreat(enemies.filter(unit => unit.hp > 0)), mode: "balanced-damage" };
+          return { skill: SKILLS.basicStrike, target: pickHighestThreat(enemies.filter(unit => unit.hp > 0)), mode: "basic" };
+        }
+      };
+    }
+
+    function createCombatUnit(template, team, slot, options = {}) {
+      const stats = derivedStats(template);
+      const hpMul = options.hpMultiplier || 1;
+      const aresMul = options.statusResistMultiplier || 1;
+      const unit = {
+        id: `${team}-${slot}-${template.buildId || template.name}`,
+        name: template.name,
+        buildId: template.buildId || template.name,
+        generatedSkillKeys: template.generatedSkillKeys || [],
+        buildMeta: template.buildMeta || null,
+        team,
+        maxHp: Math.floor(stats.MaxHP * hpMul),
+        hp: Math.floor(stats.MaxHP * hpMul),
+        maxSp: stats.MaxSP,
+        sp: stats.MaxSP,
+        stats: {
+          ...stats,
+          ARES: stats.ARES * aresMul
+        },
+        gauge: 0,
+        actions: 0,
+        burst: 0,
+        shields: [],
+        controlled: 0,
+        alive: true,
+        auraBuffTurns: 0,
+        tempAura: 0,
+        summon: null,
+        metrics: {
+          damageDone: 0,
+          damageTaken: 0,
+          healingDone: 0,
+          shieldDone: 0,
+          controlAttempts: 0,
+          controlSuccess: 0,
+          burstCasts: 0,
+          actions: 0,
+          spExhausted: 0,
+          skillUsage: {},
+          summonDamage: 0
+        },
+        behavior: createBehavior(template)
+      };
+      return unit;
+    }
+
+    function createSummonFromCaster(caster) {
+      const inherit = caster.stats.SummonInheritance;
+      const summonStats = {
+        PATK: caster.stats.PATK * inherit * 0.72,
+        MATK: caster.stats.MATK * inherit * 0.72,
+        PDEF: caster.stats.PDEF * inherit * 0.8,
+        MDEF: caster.stats.MDEF * inherit * 0.8,
+        SPD: caster.stats.SPD * 0.92,
+        HIT: caster.stats.HIT * 0.9,
+        EVA: caster.stats.EVA * 0.75,
+        CRIT: caster.stats.CRIT * 0.7,
+        CDMG: caster.stats.CDMG,
+        AACC: caster.stats.AACC * 0.8,
+        ARES: caster.stats.ARES * 0.8,
+        HEALP: caster.stats.HEALP * 0.5,
+        LEAD: 0,
+        TeamAuraBonus: 1,
+        SummonInheritance: 0,
+        SPRegenPerAction: 0
+      };
+      return {
+        id: `${caster.id}-summon`,
+        name: `${caster.name}·召唤卫士`,
+        buildId: `${caster.buildId}-SUMMON`,
+        team: caster.team,
+        maxHp: Math.floor(caster.maxHp * inherit * 0.45),
+        hp: Math.floor(caster.maxHp * inherit * 0.45),
+        maxSp: 0,
+        sp: 0,
+        stats: summonStats,
+        gauge: 0,
+        actions: 0,
+        burst: 0,
+        shields: [],
+        controlled: 0,
+        alive: true,
+        auraBuffTurns: 0,
+        tempAura: 0,
+        summon: null,
+        metrics: {
+          damageDone: 0,
+          damageTaken: 0,
+          healingDone: 0,
+          shieldDone: 0,
+          controlAttempts: 0,
+          controlSuccess: 0,
+          burstCasts: 0,
+          actions: 0,
+          spExhausted: 0,
+          skillUsage: {},
+          summonDamage: 0
+        },
+        behavior: {
+          chooseAction(self, allies, enemies) {
+            return { skill: SKILLS.basicStrike, target: pickLowestHp(enemies.filter(unit => unit.hp > 0)), mode: "summon-basic" };
+          }
+        },
+        ownerId: caster.id,
+        isSummon: true
+      };
+    }
+
+    function getTeamAura(units) {
+      return units.filter(unit => unit.hp > 0).reduce((sum, unit) => sum + ((unit.stats.TeamAuraBonus - 1) + unit.tempAura), 0) + 1;
+    }
+
+    function registerSkillUse(unit, skill) {
+      unit.metrics.skillUsage[skill.key] = (unit.metrics.skillUsage[skill.key] || 0) + 1;
+    }
+
+    function computeCritMultiplier(attacker, skill, rng) {
+      const critChance = clamp(attacker.stats.CRIT + (skill.extraCrit || 0), 0, 95);
+      const isCrit = rng() * 100 < critChance;
+      const critDamage = (attacker.stats.CDMG + (skill.extraCritDamage || 0)) / 100;
+      return { isCrit, multiplier: isCrit ? critDamage : 1 };
+    }
+
+    function resolveDamageAction(attacker, defender, skill, rng, realmGap, teamAura) {
+      const hit = hitChance(attacker.stats.HIT, defender.stats.EVA);
+      const lands = rng() * 100 <= hit;
+      if (!lands) return { damage: 0, hit: false, crit: false, absorbed: 0 };
+      const atkValue = skill.scaling === "MATK" ? attacker.stats.MATK : attacker.stats.PATK;
+      const defValue = skill.damageType === "magical" ? defender.stats.MDEF : defender.stats.PDEF;
+      const crit = computeCritMultiplier(attacker, skill, rng);
+      const damage = computeDamage({
+        atk: atkValue,
+        def: defValue,
+        skillRate: skill.skillRate,
+        randomFactor: 0.92 + rng() * 0.16,
+        finalBonus: teamAura,
+        critMultiplier: crit.multiplier,
+        realmGap
+      });
+      const shieldResult = applyDamageToShield(defender.shields, damage);
+      defender.shields = shieldResult.shields;
+      defender.hp = Math.max(0, defender.hp - shieldResult.remainingDamage);
+      defender.alive = defender.hp > 0;
+      attacker.metrics.damageDone += shieldResult.remainingDamage;
+      defender.metrics.damageTaken += shieldResult.remainingDamage;
+      return { damage: shieldResult.remainingDamage, hit: true, crit: crit.isCrit, absorbed: damage - shieldResult.remainingDamage };
+    }
+
+    function resolveHealAction(attacker, target, skill, teamAura, realmGap) {
+      const heal = computeHeal({ healPower: attacker.stats.HEALP, skillRate: skill.skillRate, finalBonus: teamAura, realmGap });
+      const actual = Math.min(target.maxHp - target.hp, heal);
+      target.hp += actual;
+      attacker.metrics.healingDone += actual;
+      return { heal: actual };
+    }
+
+    function resolveSanctuary(attacker, target, skill, teamAura, realmGap) {
+      const heal = computeHeal({ healPower: attacker.stats.HEALP, skillRate: skill.healRate, finalBonus: teamAura, realmGap });
+      const shield = computeShield({ healPower: attacker.stats.HEALP, skillRate: skill.shieldRate, finalBonus: teamAura, realmGap });
+      const actualHeal = Math.min(target.maxHp - target.hp, heal);
+      target.hp += actualHeal;
+      applyShield(target.shields, attacker.id, shield);
+      attacker.metrics.healingDone += actualHeal;
+      attacker.metrics.shieldDone += shield;
+      return { heal: actualHeal, shield };
+    }
+
+    function resolveControlAction(attacker, target, skill, rng, realmGap) {
+      attacker.metrics.controlAttempts += 1;
+      const chance = statusChance(skill.baseChance, attacker.stats.AACC, target.stats.ARES, realmGap);
+      const success = rng() * 100 <= chance;
+      if (success) {
+        target.controlled = Math.max(target.controlled, skill.duration);
+        attacker.metrics.controlSuccess += 1;
+      }
+      return { success, chance };
+    }
+
+    function spendResources(unit, skill) {
+      const burstCost = skill.burstCost || 0;
+      if (unit.sp < (skill.spCost || 0)) {
+        unit.metrics.spExhausted += 1;
+        return false;
+      }
+      if (unit.burst < burstCost) return false;
+      unit.sp -= skill.spCost || 0;
+      unit.burst = Math.max(0, unit.burst - burstCost);
+      if (burstCost > 0) unit.metrics.burstCasts += 1;
+      return true;
+    }
+
+    function gainActionResources(unit, tookDamage, crit) {
+      unit.sp = Math.min(unit.maxSp, unit.sp + unit.stats.SPRegenPerAction);
+      unit.burst = Math.min(100, unit.burst + 12 + (crit ? BURST_GAIN_MAP.crit : 0));
+      if (tookDamage) unit.burst = Math.min(100, unit.burst + BURST_GAIN_MAP.takeDamage);
+    }
+
+    function cleanupUnitAfterAction(unit) {
+      unit.actions += 1;
+      unit.metrics.actions += 1;
+      unit.shields = tickShieldSelfAction(unit.shields);
+      if (unit.auraBuffTurns > 0) {
+        unit.auraBuffTurns -= 1;
+        if (unit.auraBuffTurns <= 0) unit.tempAura = 0;
+      }
+      if (unit.controlled > 0) unit.controlled -= 1;
+    }
+
+    function buildRosterFromCodes(codes, level, team, options = {}) {
+      const templates = buildTemplates();
+      return codes.map((code, index) => {
+        if (typeof code === "string" && code.startsWith("C")) {
+          const build = assembleGeneratedBuild(code, { level });
+          const template = {
+            ...build.numericProfile,
+            Level: build.level,
+            name: build.name,
+            buildId: build.id,
+            generatedSkillKeys: build.skills.map(skill => skill.id),
+            buildMeta: {
+              characterId: build.characterId,
+              equipmentIds: build.equipmentIds,
+              skillIds: build.skillIds,
+              roleAxis: build.roleAxis,
+              realm: build.realm
+            }
+          };
+          return createCombatUnit(template, team, index + 1, options.unitOptions || {});
+        }
+        const template = getGrowthScaledBuild({ ...templates[code], buildId: code }, level);
+        template.buildId = code;
+        return createCombatUnit(template, team, index + 1, options.unitOptions || {});
+      });
+    }
+
+    function getLiving(units, team) {
+      return units.filter(unit => unit.team === team && unit.hp > 0);
+    }
+
+    function battleFinished(units) {
+      const allyAlive = getLiving(units, "A").length;
+      const enemyAlive = getLiving(units, "B").length;
+      return allyAlive === 0 || enemyAlive === 0;
+    }
+
+    function winnerSide(units) {
+      const allyHp = getLiving(units, "A").reduce((sum, unit) => sum + unit.hp, 0);
+      const enemyHp = getLiving(units, "B").reduce((sum, unit) => sum + unit.hp, 0);
+      return allyHp >= enemyHp ? "A" : "B";
+    }
+
+    function simulateTeamBattle(config) {
+      const rng = seededRng(config.seed || 1);
+      const units = [];
+      const allyOptions = config.allyOptions || {};
+      const enemyOptions = config.enemyOptions || {};
+      buildRosterFromCodes(config.allies, config.level, "A", { unitOptions: allyOptions }).forEach(unit => units.push(unit));
+      buildRosterFromCodes(config.enemies, config.enemyLevel || config.level, "B", { unitOptions: enemyOptions }).forEach(unit => units.push(unit));
+      if (config.bossMode) {
+        const boss = units.find(unit => unit.team === "B");
+        if (boss) {
+          const bonus = bossBonuses(Math.max(0, config.allies.length - config.enemies.length));
+          boss.maxHp = Math.floor(boss.maxHp * bonus.hpBonus);
+          boss.hp = boss.maxHp;
+          boss.stats.ARES *= bonus.statusResistBonus;
+          boss.gaugeBonus = bonus.actionGaugeBonus;
+          boss.bossBonuses = bonus;
+        }
+      }
+
+      const timeline = [];
+      const maxTicks = config.maxTicks || 450;
+      let controlAttempts = 0;
+      let controlSuccess = 0;
+      let totalBurstCasts = 0;
+      let totalSpExhausted = 0;
+
+      for (let tick = 1; tick <= maxTicks; tick += 1) {
+        for (const unit of units) {
+          if (unit.hp <= 0) continue;
+          const gaugeBonus = unit.gaugeBonus || 1;
+          unit.gauge += effectiveSPD(unit.stats.SPD, true) * gaugeBonus;
+        }
+
+        const ready = units.filter(unit => unit.hp > 0 && unit.gauge >= 1000).sort((a, b) => b.gauge - a.gauge);
+        for (const actor of ready) {
+          if (actor.hp <= 0) continue;
+          actor.gauge -= 1000;
+          if (actor.controlled > 0) {
+            timeline.push({ tick, actor: actor.name, action: "controlled_skip" });
+            cleanupUnitAfterAction(actor);
+            continue;
+          }
+
+          const allies = getLiving(units, actor.team);
+          const enemies = getLiving(units, actor.team === "A" ? "B" : "A");
+          if (!enemies.length) break;
+          const teamAura = getTeamAura(allies);
+          const choice = actor.behavior.chooseAction(actor, allies, enemies, rng) || { skill: SKILLS.basicStrike };
+          const skill = choice.skill || SKILLS.basicStrike;
+          const target = choice.target || pickHighestThreat(enemies) || enemies[0];
+
+          if (!spendResources(actor, skill)) {
+            totalSpExhausted += 1;
+            const fallback = SKILLS.basicStrike;
+            registerSkillUse(actor, fallback);
+            const result = resolveDamageAction(actor, target, fallback, rng, config.realmGap || 0, teamAura);
+            if (result.hit) {
+              actor.burst = Math.min(100, actor.burst + BURST_GAIN_MAP.basicHit + (result.crit ? BURST_GAIN_MAP.crit : 0));
+              target.burst = Math.min(100, target.burst + BURST_GAIN_MAP.takeDamage);
+            }
+            gainActionResources(actor, false, result.crit);
+            cleanupUnitAfterAction(actor);
+            timeline.push({ tick, actor: actor.name, action: fallback.key, result });
+            if (battleFinished(units)) break;
+            continue;
+          }
+
+          registerSkillUse(actor, skill);
+          let eventResult = {};
+          if (skill.type === "damage") {
+            eventResult = resolveDamageAction(actor, target, skill, rng, config.realmGap || 0, teamAura);
+            if (eventResult.hit) {
+              actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse) + (eventResult.crit ? BURST_GAIN_MAP.crit : 0));
+              target.burst = Math.min(100, target.burst + BURST_GAIN_MAP.takeDamage);
+            }
+            if (!target.alive) actor.burst = Math.min(100, actor.burst + BURST_GAIN_MAP.kill);
+          } else if (skill.type === "heal") {
+            eventResult = resolveHealAction(actor, choice.target || pickLowestHp(allies), skill, teamAura, config.realmGap || 0);
+            actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse));
+          } else if (skill.type === "healShield") {
+            eventResult = resolveSanctuary(actor, choice.target || pickLowestHp(allies), skill, teamAura, config.realmGap || 0);
+            actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse));
+          } else if (skill.type === "control") {
+            eventResult = resolveControlAction(actor, target, skill, rng, config.realmGap || 0);
+            actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse));
+            controlAttempts += 1;
+            if (eventResult.success) controlSuccess += 1;
+          } else if (skill.type === "buff") {
+            actor.tempAura = skill.auraBoost;
+            actor.auraBuffTurns = skill.duration;
+            actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse));
+            eventResult = { auraBoost: skill.auraBoost, duration: skill.duration };
+          } else if (skill.type === "summon") {
+            if (!actor.summon || actor.summon.hp <= 0) {
+              const summon = createSummonFromCaster(actor);
+              actor.summon = summon;
+              units.push(summon);
+              eventResult = { summonHp: summon.hp, inheritance: round(actor.stats.SummonInheritance, 3) };
+            } else {
+              eventResult = { summonHp: actor.summon.hp, refreshed: false };
+            }
+            actor.burst = Math.min(100, actor.burst + (skill.burstGain || BURST_GAIN_MAP.skillUse));
+          }
+
+          totalBurstCasts += actor.metrics.burstCasts;
+          gainActionResources(actor, false, !!eventResult.crit);
+          cleanupUnitAfterAction(actor);
+          timeline.push({ tick, actor: actor.name, action: skill.key, result: eventResult, mode: choice.mode || "" });
+          if (battleFinished(units)) break;
+        }
+        if (battleFinished(units)) {
+          const participants = units.filter(unit => unit.hp > 0);
+          participants.forEach(unit => {
+            if (unit.controlled > 0) unit.controlled -= 1;
+          });
+          break;
+        }
+      }
+
+      const sideA = units.filter(unit => unit.team === "A");
+      const sideB = units.filter(unit => unit.team === "B");
+      const allyDamage = sideA.reduce((sum, unit) => sum + unit.metrics.damageDone, 0);
+      const enemyDamage = sideB.reduce((sum, unit) => sum + unit.metrics.damageDone, 0);
+      const totalActions = units.reduce((sum, unit) => sum + unit.actions, 0);
+      const skillUsage = {};
+      units.forEach(unit => {
+        Object.entries(unit.metrics.skillUsage).forEach(([key, value]) => {
+          skillUsage[key] = (skillUsage[key] || 0) + value;
+        });
+      });
+
+      return {
+        config: clone(config),
+        winner: winnerSide(units),
+        ticksUsed: timeline.length ? timeline[timeline.length - 1].tick : maxTicks,
+        totalActions,
+        timeline: timeline.slice(0, 60),
+        units: units.map(unit => ({
+          name: unit.name,
+          buildId: unit.buildId,
+          team: unit.team,
+          hp: round(unit.hp, 2),
+          maxHp: unit.maxHp,
+          sp: round(unit.sp, 2),
+          actions: unit.actions,
+          burst: round(unit.burst, 2),
+          controlled: unit.metrics.controlSuccess,
+          metrics: unit.metrics,
+          teamAuraBonus: round(unit.stats.TeamAuraBonus, 3),
+          summonInheritance: round(unit.stats.SummonInheritance, 3)
+        })),
+        aggregate: {
+          allyDamage,
+          enemyDamage,
+          allyHealing: sideA.reduce((sum, unit) => sum + unit.metrics.healingDone, 0),
+          allyShield: sideA.reduce((sum, unit) => sum + unit.metrics.shieldDone, 0),
+          controlAttempts,
+          controlSuccess,
+          controlUptime: controlAttempts ? round(controlSuccess / controlAttempts, 4) : 0,
+          burstCasts: units.reduce((sum, unit) => sum + unit.metrics.burstCasts, 0),
+          spExhausted: units.reduce((sum, unit) => sum + unit.metrics.spExhausted, 0),
+          skillUsage,
+          damageShare: sideA.map(unit => ({ name: unit.name, share: allyDamage ? round(unit.metrics.damageDone / allyDamage, 4) : 0 })),
+          teamAuraTotalA: round(getTeamAura(sideA), 3),
+          teamAuraTotalB: round(getTeamAura(sideB), 3)
+        }
+      };
+    }
+
+    function runMonteCarlo(config, rounds, seedBase = 1000) {
+      const results = [];
+      for (let i = 0; i < rounds; i += 1) {
+        results.push(simulateTeamBattle({ ...config, seed: seedBase + i }));
+      }
+      const wins = results.filter(item => item.winner === "A").length;
+      const lengths = results.map(item => item.ticksUsed);
+      const actions = results.map(item => item.totalActions);
+      const allyDamage = results.map(item => item.aggregate.allyDamage);
+      const burstFreq = results.map(item => item.aggregate.burstCasts / Math.max(1, item.totalActions));
+      const controlRate = results.map(item => item.aggregate.controlUptime);
+      const spDryRate = results.map(item => item.aggregate.spExhausted / Math.max(1, item.totalActions));
+      return {
+        rounds,
+        seedBase,
+        winRate: round(wins / rounds, 4),
+        avgBattleLength: round(lengths.reduce((a, b) => a + b, 0) / rounds, 2),
+        minBattleLength: Math.min(...lengths),
+        maxBattleLength: Math.max(...lengths),
+        avgActions: round(actions.reduce((a, b) => a + b, 0) / rounds, 2),
+        avgDamage: round(allyDamage.reduce((a, b) => a + b, 0) / rounds, 2),
+        damageMin: Math.min(...allyDamage),
+        damageMax: Math.max(...allyDamage),
+        avgBurstFrequency: round(burstFreq.reduce((a, b) => a + b, 0) / rounds, 4),
+        avgControlEffectiveness: round(controlRate.reduce((a, b) => a + b, 0) / rounds, 4),
+        avgSpDryRate: round(spDryRate.reduce((a, b) => a + b, 0) / rounds, 4),
+        sampleFirst: results[0],
+        damageShareAverage: averageDamageShare(results),
+        skillUsagePerBattle: averageSkillUsage(results)
+      };
+    }
+
+    function averageDamageShare(results) {
+      const pool = {};
+      results.forEach(result => {
+        result.aggregate.damageShare.forEach(item => {
+          pool[item.name] = (pool[item.name] || 0) + item.share;
+        });
+      });
+      return Object.entries(pool).map(([name, total]) => ({ name, share: round(total / results.length, 4) }));
+    }
+
+    function averageSkillUsage(results) {
+      const pool = {};
+      results.forEach(result => {
+        Object.entries(result.aggregate.skillUsage).forEach(([key, value]) => {
+          pool[key] = (pool[key] || 0) + value;
+        });
+      });
+      Object.keys(pool).forEach(key => {
+        pool[key] = round(pool[key] / results.length, 2);
+      });
+      return pool;
+    }
+
+    function createProgressionExports() {
+      const templates = buildTemplates();
+      const builds = ["B1", "B3", "B4", "B5", "B6", "B7", "B8", "B9"];
+      return LEVEL_BRACKETS.map(level => ({
+        level,
+        builds: builds.map(code => {
+          const template = { ...templates[code], buildId: code };
+          const scaled = getGrowthScaledBuild(template, level);
+          const stats = derivedStats(scaled);
+          const duelProbe = simulateTeamBattle({ allies: [code], enemies: ["B9"], level, enemyLevel: level, maxTicks: 220, seed: 800 + level });
+          return {
+            buildId: code,
+            name: scaled.name,
+            core: {
+              MaxHP: round(stats.MaxHP, 1),
+              MaxSP: round(stats.MaxSP, 1),
+              PATK: round(stats.PATK, 1),
+              MATK: round(stats.MATK, 1),
+              SPD: round(stats.SPD, 1),
+              HEALP: round(stats.HEALP, 1),
+              LEAD: round(stats.LEAD, 1),
+              TeamAuraBonus: round(stats.TeamAuraBonus, 3),
+              SummonInheritance: round(stats.SummonInheritance, 3)
+            },
+            combatProbe: {
+              winnerVsB9: duelProbe.winner,
+              battleTicks: duelProbe.ticksUsed,
+              damageDone: duelProbe.aggregate.allyDamage,
+              actions: duelProbe.totalActions,
+              burstCasts: duelProbe.aggregate.burstCasts,
+              spDryRate: round(duelProbe.aggregate.spExhausted / Math.max(1, duelProbe.totalActions), 4)
+            }
+          };
+        })
+      }));
+    }
+
+    function createBatchTestScenarios() {
+      return [
+        {
+          id: "batch-tier-balance",
+          label: "同层级混编对照",
+          goal: "验证同 tier 典型 Build 在 3v3 下的基础平衡",
+          allies: ["C001", "C012", "C023"],
+          enemies: ["C034", "C045", "C056"],
+          level: 30,
+          rounds: 12,
+          seedBase: 12000,
+          realmGap: 0,
+          maxTicks: 320
+        },
+        {
+          id: "batch-support-core",
+          label: "统御/治疗混编",
+          goal: "验证 aura、heal、summon 的协同能接入实战",
+          allies: ["C006", "C015", "C024"],
+          enemies: ["C037", "C048", "C059"],
+          level: 60,
+          rounds: 12,
+          seedBase: 13000,
+          realmGap: 0,
+          maxTicks: 360
+        },
+        {
+          id: "batch-variance-pressure",
+          label: "暴击/控制压力组",
+          goal: "验证高波动输出与控制构筑在批量下的表现分布",
+          allies: ["C008", "C014", "C026"],
+          enemies: ["C031", "C042", "C053"],
+          level: 60,
+          rounds: 12,
+          seedBase: 14000,
+          realmGap: 0,
+          maxTicks: 360
+        },
+        {
+          id: "batch-realm-challenge",
+          label: "越阶压力测试",
+          goal: "验证阶段压制在生成资产上仍然明显",
+          allies: ["C061", "C072", "C083"],
+          enemies: ["C094", "C095", "C096"],
+          level: 100,
+          rounds: 10,
+          seedBase: 15000,
+          realmGap: -1,
+          maxTicks: 420
+        }
+      ];
+    }
+
+    function createVisualBattleScenarios() {
+      return [
+        {
+          id: "visual-tier-balance",
+          label: "3v3 同层级混编演示",
+          description: "同 tier 角色各司其职，观察基础攻防与节奏。",
+          allies: ["C001", "C012", "C023"],
+          enemies: ["C034", "C045", "C056"],
+          level: 30,
+          enemyLevel: 30,
+          seed: 21001,
+          maxTicks: 320,
+          realmGap: 0
+        },
+        {
+          id: "visual-support-core",
+          label: "3v3 统御/治疗/召唤演示",
+          description: "重点观察 aura、护盾、治疗与召唤在多人战中的可视结果。",
+          allies: ["C006", "C015", "C024"],
+          enemies: ["C037", "C048", "C059"],
+          level: 60,
+          enemyLevel: 60,
+          seed: 22001,
+          maxTicks: 360,
+          realmGap: 0
+        },
+        {
+          id: "visual-crit-control",
+          label: "3v3 暴击/控制压力演示",
+          description: "重点观察控制生效、爆发击杀与关键回合。",
+          allies: ["C008", "C014", "C026"],
+          enemies: ["C031", "C042", "C053"],
+          level: 60,
+          enemyLevel: 60,
+          seed: 23001,
+          maxTicks: 360,
+          realmGap: 0
+        }
+      ];
+    }
+
+    const VISUAL_BATTLE_SCENARIOS = createVisualBattleScenarios();
+
+    function runGeneratedBatchTests() {
+      return createBatchTestScenarios().map(scene => {
+        const summary = runMonteCarlo({
+          allies: scene.allies,
+          enemies: scene.enemies,
+          level: scene.level,
+          rounds: scene.rounds,
+          realmGap: scene.realmGap,
+          maxTicks: scene.maxTicks
+        }, scene.rounds, scene.seedBase);
+        return {
+          ...scene,
+          summary,
+          sampleBuilds: {
+            allies: scene.allies.map(id => assembleGeneratedBuild(id, { level: scene.level })),
+            enemies: scene.enemies.map(id => assembleGeneratedBuild(id, { level: scene.level }))
+          }
+        };
+      });
+    }
+
+    function summarizeAssetLibrary() {
+      return {
+        characters: GENERATED_CHARACTERS.length,
+        equipments: GENERATED_EQUIPMENTS.length,
+        skills: GENERATED_SKILLS.length,
+        characterTags: [...new Set(GENERATED_CHARACTERS.flatMap(item => item.tags))].slice(0, 12),
+        equipmentSlots: [...new Set(GENERATED_EQUIPMENTS.map(item => item.slot))],
+        skillFamilies: [...new Set(GENERATED_SKILLS.map(item => item.family))]
+      };
+    }
+
+    function buildConclusionData(progressions, longBattles, bossData) {
+      const levelInsight = progressions.map(stage => {
+        const sorted = stage.builds.slice().sort((a, b) => b.combatProbe.damageDone - a.combatProbe.damageDone);
+        const sustain = stage.builds.slice().sort((a, b) => (b.core.HEALP + b.core.MaxHP) - (a.core.HEALP + a.core.MaxHP));
+        return `Lv${stage.level}：输出领先=${sorted[0].buildId}，续航领先=${sustain[0].buildId}，统御收益最高=${stage.builds.sort((a, b) => b.core.LEAD - a.core.LEAD)[0].buildId}`;
+      });
+      const longInsight = longBattles.map(item => `${item.label}：均长 ${item.data.avgBattleLength} tick，SP 枯竭率 ${round(item.data.avgSpDryRate * 100, 2)}%，Burst 频率 ${round(item.data.avgBurstFrequency * 100, 2)}%，控制生效率 ${round(item.data.avgControlEffectiveness * 100, 2)}%`);
+      const bossInsight = bossData.map(item => `${item.label}：胜率 ${round(item.data.winRate * 100, 2)}%，平均伤害 ${item.data.avgDamage}，光环总值 ${item.data.sampleFirst.aggregate.teamAuraTotalA}`);
+      const risks = [];
+      const late = progressions.find(item => item.level === 100);
+      if (late) {
+        const topDamage = late.builds.slice().sort((a, b) => b.combatProbe.damageDone - a.combatProbe.damageDone);
+        if (topDamage[0].combatProbe.damageDone > topDamage[topDamage.length - 1].combatProbe.damageDone * 2.2) {
+          risks.push("Lv100 末期输出差距超过 2.2 倍，需关注终盘 build 收敛。 ");
+        }
+      }
+      longBattles.forEach(item => {
+        if (item.data.avgSpDryRate > 0.18) risks.push(`${item.label} 的 SP 枯竭率偏高，长战可能退化为普攻。`);
+      });
+      bossData.forEach(item => {
+        if (item.data.winRate < 0.45) risks.push(`${item.label} 的稳定性不足，Boss/协同补偿可能压制过强。`);
+      });
+      if (!risks.length) risks.push("当前最小假设下未出现明显失控点，但控制与治疗均为简化模型，后续仍需接真实技能表复核。");
+      return [
+        { title: "不同等级档 build 体验", bullets: levelInsight },
+        { title: "前中后期节奏", bullets: longInsight },
+        { title: "Boss / 队伍协同", bullets: bossInsight },
+        { title: "主要风险点", bullets: risks }
+      ];
+    }
+
+    function generateTests() {
+      const tests = [];
+      const builds = buildTemplates();
+
+      const formulaCases = [
+        ["HP-01", "公式测试", "验证开局 HP", { Level: 1, STR: 15, SPI: 10 }, 289, input => derivedStats(input).MaxHP, 0],
+        ["HP-02", "公式测试", "验证中期重装 HP", { Level: 30, STR: 90, SPI: 40, FlatHPBonus: 300 }, 1530, input => derivedStats(input).MaxHP, 0],
+        ["HP-03", "公式测试", "验证高 STR HP", { Level: 100, STR: 300, SPI: 60, FlatHPBonus: 1200 }, 4700, input => derivedStats(input).MaxHP, 0],
+        ["SP-01", "公式测试", "验证新手法系 SP", { Level: 1, INT: 16, SPI: 14 }, 218, input => derivedStats(input).MaxSP, 0],
+        ["SP-02", "公式测试", "验证控制法师 SP", { Level: 30, INT: 80, SPI: 95, FlatSPBonus: 150 }, 1330, input => derivedStats(input).MaxSP, 0],
+        ["PATK-01", "公式测试", "验证力量战士 PATK", { STR: 80, AGI: 25, Level: 30, WeaponATK: 90, FlatPATKBonus: 40 }, 380.5, input => derivedStats(input).PATK, 0],
+        ["PATK-02", "公式测试", "验证力敏刺客 PATK", { STR: 45, AGI: 85, Level: 30, WeaponATK: 70, FlatPATKBonus: 20 }, 291.5, input => derivedStats(input).PATK, 0],
+        ["MATK-01", "公式测试", "验证爆发法师 MATK", { INT: 100, SPI: 50, Level: 30, WeaponMATK: 100, FlatMATKBonus: 50 }, 475, input => derivedStats(input).MATK, 0],
+        ["MATK-02", "公式测试", "验证智精控制者 MATK", { INT: 75, SPI: 90, Level: 30, WeaponMATK: 70, FlatMATKBonus: 30 }, 392, input => derivedStats(input).MATK, 0],
+        ["CRIT-01", "公式测试", "验证极限暴击率", { AGI: 180, LUK: 180, CritBonus: 15 }, 66.8, input => round(derivedStats(input).CRIT, 1), 0],
+        ["CHA-AURA-01", "公式测试", "验证光环 LEAD 50", { value: 50 }, 1.05, input => 1 + Math.min(0.20, input.value / 1000), 0],
+        ["CHA-AURA-02", "公式测试", "验证光环 LEAD 150", { value: 150 }, 1.15, input => 1 + Math.min(0.20, input.value / 1000), 0],
+        ["CHA-AURA-03", "公式测试", "验证光环 LEAD 260 封顶", { value: 260 }, 1.2, input => 1 + Math.min(0.20, input.value / 1000), 0],
+        ["SUMMON-01", "公式测试", "验证召唤继承 LEAD 100", { value: 100 }, 0.6, input => 0.5 + Math.min(0.35, input.value / 1000), 0],
+        ["SUMMON-02", "公式测试", "验证召唤继承 LEAD 200", { value: 200 }, 0.7, input => 0.5 + Math.min(0.35, input.value / 1000), 0],
+        ["SUMMON-03", "公式测试", "验证召唤继承 LEAD 350 封顶", { value: 350 }, 0.85, input => 0.5 + Math.min(0.35, input.value / 1000), 0],
+        ["CTRL-BASIC", "公式测试", "验证控制等值概率", { base: 40, aacc: 220, ares: 220 }, 40, input => round(statusChance(input.base, input.aacc, input.ares), 1), 0],
+        ["CTRL-HARD", "公式测试", "验证高控打高抗概率", { base: 40, aacc: 320, ares: 180 }, 53.3, input => round(statusChance(input.base, input.aacc, input.ares), 1), 0.1],
+        ["CTRL-EXTREME", "公式测试", "验证控制 85% 上限", { base: 65, aacc: 420, ares: 140 }, 85, input => round(statusChance(input.base, input.aacc, input.ares), 1), 0],
+        ["HEAL-BASIC", "公式测试", "验证治疗基础量", { healPower: 250, skillRate: 1.2 }, 300, input => computeHeal(input), 0],
+        ["SHIELD-BASIC", "公式测试", "验证护盾基础量", { healPower: 220, skillRate: 1.0, flatShield: 80 }, 300, input => computeShield(input), 0],
+        ["HIT-LOW", "公式测试", "验证命中下限 72%", { hit: 100, eva: 300 }, 72, input => hitChance(input.hit, input.eva), 0],
+        ["HIT-HIGH", "公式测试", "验证命中上限 98%", { hit: 260, eva: 10 }, 98, input => hitChance(input.hit, input.eva), 0]
+      ];
+
+      for (const [id, layer, goal, input, expected, fn, tolerance] of formulaCases) {
+        const actual = fn(input);
+        tests.push(row(layer, id, goal, input, expected, actual, tolerance, approxEqual(actual, expected, tolerance), "关键样例自动验算"));
+      }
+
+      const atbBase = simulateATB({
+        combatants: [
+          { name: "SPD80", spd: 80 },
+          { name: "SPD120", spd: 120 },
+          { name: "SPD160", spd: 160 },
+          { name: "SPD220", spd: 220 },
+          { name: "SPD300", spd: 300 }
+        ],
+        ticks: 100
+      });
+      const expectedBase = { SPD80: 8, SPD120: 12, SPD160: 16, SPD220: 22, SPD300: 30 };
+      for (const item of atbBase) {
+        tests.push(row("ATB 节奏", `ATB-01-${item.name}`, "记录 100 tick 行动次数", { spd: item.rawSPD, ticks: 100 }, expectedBase[item.name], item.actionCount, 0, item.actionCount === expectedBase[item.name], "ATB 初始条固定为 0"));
+      }
+
+      const atbHigh = simulateATB({ combatants: [{ name: "High", spd: 260 }, { name: "Normal", spd: 120 }], ticks: 100, useSoftCap: true });
+      const highRatio = round(atbHigh[0].actionCount / atbHigh[1].actionCount, 3);
+      tests.push(row("ATB 节奏", "ATB-02", "验证高敏对普通角色行动次数比不超过 2.2", { highSPD: 260, normalSPD: 120, ticks: 100, softCap: true }, true, highRatio <= 2.2, 0, highRatio <= 2.2, `实际比值=${highRatio}`));
+
+      const softCases = [220, 260, 320, 400];
+      const softExpected = { 220: 220, 260: 240, 320: 270, 400: 310 };
+      for (const raw of softCases) {
+        const actual = effectiveSPD(raw, true);
+        tests.push(row("ATB 节奏", `ATB-05-${raw}`, "验证速度软上限折算", { rawSPD: raw }, softExpected[raw], actual, 0, actual === softExpected[raw], "EffectiveSPD = min(220, RawSPD) + max(0, RawSPD - 220) * 0.5"));
+      }
+
+      const stageCases = [
+        { id: "REALM-01", gap: 0, expected: 100, note: "同阶" },
+        { id: "REALM-02", gap: 1, expected: 100, note: "高一阶伤害=1.25*0.8=1.0" },
+        { id: "REALM-03", gap: 2, expected: 76, note: "高二阶伤害=1.7*0.45=0.765" },
+        { id: "REALM-04", gap: 3, expected: 48, note: "R3 固定占位=2.4*0.2=0.48" }
+      ];
+      for (const item of stageCases) {
+        const actual = computeDamage({ atk: 200, def: 100, realmGap: item.gap, randomFactor: 1, skillRate: 1, finalBonus: 1 });
+        tests.push(row("阶段压制", item.id, "验证阶段压制造成的最终伤害", { atk: 200, def: 100, realmGap: item.gap }, item.expected, actual, 0, actual === item.expected, item.note));
+      }
+
+      const statusR3 = round(statusChance(40, 320, 180, 3), 1);
+      tests.push(row("阶段压制", "REALM-CTRL-R3", "验证 R3 控制压制显著下降且受 5% 下限保护", { base: 40, aacc: 320, ares: 180, realmGap: 3 }, 5, statusR3, 0.1, approxEqual(statusR3, 5, 0.1), "40*sqrt(320/180)*0.1*0.1 约为 0.53%，最终被 5% 下限夹制"));
+
+      const spCase1 = simulateSPCycle({ initialSP: 100, spRegenPerAction: 10, skillCosts: [8, 8, 8, 8, 8] });
+      tests.push(row("SP/Burst 资源", "SP-CYCLE-01", "验证低耗技能循环可持续", { initialSP: 100, spRegen: 10, costs: [8, 8, 8, 8, 8] }, 100, spCase1.finalSP, 0, spCase1.finalSP === 100, stringify(spCase1.history)));
+
+      const spCase2 = simulateSPCycle({ initialSP: 90, spRegenPerAction: 8, skillCosts: [24, 24, 24, 24, 24, 24] });
+      const sp2UsedCount = spCase2.history.filter(item => item.usedSkill).length;
+      tests.push(row("SP/Burst 资源", "SP-CYCLE-02", "验证中高耗技能 4~6 次后出现压力", { initialSP: 90, spRegen: 8, costs: [24, 24, 24, 24, 24, 24] }, true, sp2UsedCount >= 4 && sp2UsedCount <= 6, 0, sp2UsedCount >= 4 && sp2UsedCount <= 6, `实际成功施放次数=${sp2UsedCount}`));
+
+      const spZero = simulateSPCycle({ initialSP: 0, spRegenPerAction: 4, skillCosts: [10] });
+      tests.push(row("SP/Burst 资源", "SP-ZERO", "验证 0 SP 仍不会死锁", { initialSP: 0, spRegen: 4, costs: [10] }, false, spZero.history[0].usedSkill, 0, spZero.history[0].usedSkill === false, stringify(spZero.history)));
+
+      const burst1 = simulateBurst([{ type: "basicHit" }, { type: "basicHit" }, { type: "basicHit" }, { type: "basicHit" }, { type: "basicHit" }]);
+      tests.push(row("SP/Burst 资源", "BURST-01", "验证 5 次普攻攒能", { count: 5 }, 60, burst1.burst, 0, burst1.burst === 60, "每次 +12"));
+      const burst2 = simulateBurst([{ type: "skillUse" }, { type: "skillUse" }, { type: "skillUse" }, { type: "skillUse" }, { type: "skillUse" }]);
+      tests.push(row("SP/Burst 资源", "BURST-02", "验证 5 次技能攒能", { count: 5 }, 40, burst2.burst, 0, burst2.burst === 40, "每次 +8"));
+      const burst3 = simulateBurst([{ type: "takeDamage" }, { type: "takeDamage" }, { type: "takeDamage" }, { type: "takeDamage" }, { type: "takeDamage" }, { type: "takeDamage" }]);
+      tests.push(row("SP/Burst 资源", "BURST-03", "验证 6 次受击攒能", { count: 6 }, 36, burst3.burst, 0, burst3.burst === 36, "每次 +6"));
+      const burst4 = simulateBurst([{ type: "kill" }, { type: "kill" }]);
+      tests.push(row("SP/Burst 资源", "BURST-04", "验证 2 次击杀攒能", { count: 2 }, 40, burst4.burst, 0, burst4.burst === 40, "每次 +20"));
+      const burstEdge = simulateBurst([{ type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "kill" }]);
+      tests.push(row("SP/Burst 资源", "BURST-EDGE-01", "验证 Burst 上限截断到 100", { count: 6, each: 20 }, 100, burstEdge.burst, 0, burstEdge.burst === 100, "超上限截断"));
+      const burstSpend = simulateBurst([{ type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "kill" }, { type: "spend", value: 80 }]);
+      tests.push(row("SP/Burst 资源", "BURST-EDGE-02", "验证必杀消耗独立扣除", { startByEvents: 5, spend: 80 }, 20, burstSpend.burst, 0, burstSpend.burst === 20, stringify(burstSpend.history)));
+
+      const progressionData = createProgressionExports();
+      progressionData.forEach(stage => {
+        stage.builds.forEach(build => {
+          tests.push(row(
+            "成长档位",
+            `GROWTH-${stage.level}-${build.buildId}`,
+            "输出成长档位关键导出属性与战斗指标",
+            { level: stage.level, build: build.buildId, growthPlan: "A" },
+            true,
+            true,
+            0,
+            true,
+            stringify({ core: build.core, combatProbe: build.combatProbe })
+          ));
+        });
+      });
+
+      const duelScenarios = [
+        { id: "DUEL-B1-B3", allies: ["B1"], enemies: ["B3"], level: 30 },
+        { id: "DUEL-B4-B5", allies: ["B4"], enemies: ["B5"], level: 30 },
+        { id: "DUEL-B6-B8", allies: ["B6"], enemies: ["B8"], level: 30 },
+        { id: "DUEL-B7-B9", allies: ["B7"], enemies: ["B9"], level: 60 }
+      ];
+      duelScenarios.forEach((scenario, index) => {
+        const result = simulateTeamBattle({ ...scenario, seed: 200 + index, maxTicks: 260 });
+        const skillCount = Object.keys(result.aggregate.skillUsage).length;
+        tests.push(row("Build 对战", scenario.id, "不同 build 使用最小技能循环体现差异", scenario, true, skillCount >= 2, 0, skillCount >= 2, stringify({ winner: result.winner, ticks: result.ticksUsed, usage: result.aggregate.skillUsage, control: result.aggregate.controlUptime, burst: result.aggregate.burstCasts })));
+      });
+
+      const longBattleScenarios = [
+        { label: "前期长战", data: runMonteCarlo({ allies: ["B1", "B5", "B6"], enemies: ["B3", "B4", "B9"], level: 10, maxTicks: 320 }, 24, 3000) },
+        { label: "中期长战", data: runMonteCarlo({ allies: ["B1", "B5", "B6"], enemies: ["B3", "B4", "B9"], level: 30, maxTicks: 360 }, 24, 4000) },
+        { label: "后期长战", data: runMonteCarlo({ allies: ["B1", "B5", "B6"], enemies: ["B3", "B4", "B9"], level: 100, maxTicks: 420 }, 24, 5000) }
+      ];
+      longBattleScenarios.forEach((scenario, index) => {
+        const actual = scenario.data;
+        const stable = actual.avgBattleLength > 20 && actual.avgSpDryRate < 0.45;
+        tests.push(row("长战资源", `LONG-${index + 1}`, "输出平均战斗长度/技能频率/SP 枯竭/Burst/控制生效率", { label: scenario.label, rounds: actual.rounds }, true, stable, 0, stable, stringify(actual)));
+      });
+
+      const bossWithCore = runMonteCarlo({ allies: ["B1", "B6", "B7"], enemies: ["B4"], level: 60, enemyLevel: 60, bossMode: true, maxTicks: 420 }, 30, 6000);
+      const bossWithoutCore = runMonteCarlo({ allies: ["B1", "B6", "B9"], enemies: ["B4"], level: 60, enemyLevel: 60, bossMode: true, maxTicks: 420 }, 30, 7000);
+      tests.push(row("Boss/协同", "BOSS-TEAM-AURA", "接入 TeamAuraBonus / SummonInheritance / Boss 补偿并比较统御核心差异", { withCore: ["B1", "B6", "B7"], withoutCore: ["B1", "B6", "B9"], boss: ["B4"], level: 60, rounds: 30 }, true, bossWithCore.avgDamage !== bossWithoutCore.avgDamage, 0, bossWithCore.avgDamage !== bossWithoutCore.avgDamage, stringify({ withCore: bossWithCore, withoutCore: bossWithoutCore })));
+
+      const summonBattle = simulateTeamBattle({ allies: ["B7", "B6", "B1"], enemies: ["B9", "B8", "B4"], level: 30, maxTicks: 300, seed: 8100 });
+      const summonUsed = (summonBattle.aggregate.skillUsage.summonGuard || 0) >= 1;
+      tests.push(row("Boss/协同", "SUMMON-TEAM-01", "验证统御流可在多人战中实际召唤并带来协同输出", { allies: ["B7", "B6", "B1"], enemies: ["B9", "B8", "B4"], level: 30 }, true, summonUsed, 0, summonUsed, stringify(summonBattle.aggregate)));
+
+      const monteCarloKey = runMonteCarlo({ allies: ["B4", "B5", "B6"], enemies: ["B1", "B3", "B8"], level: 60, maxTicks: 380 }, 40, 9000);
+      const mcPass = monteCarloKey.winRate >= 0 && monteCarloKey.winRate <= 1 && monteCarloKey.damageShareAverage.length >= 3;
+      tests.push(row("MonteCarlo", "MC-KEY-01", "输出均值、极值、胜率、行动数、伤害占比等统计", { rounds: 40, seedBase: 9000, scene: "B4+B5+B6 vs B1+B3+B8" }, true, mcPass, 0, mcPass, stringify(monteCarloKey)));
+
+      const shields = createShieldState();
+      applyShield(shields, "same-source", 200);
+      applyShield(shields, "same-source", 250);
+      const sameSourceOk = shields.length === 1 && shields[0].value === 250;
+      tests.push(row("边界异常", "SHIELD-STACK-01", "验证同源护盾覆盖", { source: "same-source", first: 200, second: 250 }, true, sameSourceOk, 0, sameSourceOk, stringify(shields)));
+
+      const stackShields = createShieldState();
+      applyShield(stackShields, "a", 100);
+      applyShield(stackShields, "b", 150);
+      applyShield(stackShields, "c", 90);
+      applyShield(stackShields, "d", 80);
+      const stackOk = stackShields.length === 3 && totalShield(stackShields) === 340;
+      tests.push(row("边界异常", "SHIELD-STACK-02", "验证异源护盾最多 3 层", { sources: ["a", "b", "c", "d"] }, true, stackOk, 0, stackOk, stringify(stackShields)));
+
+      let durationShields = createShieldState();
+      applyShield(durationShields, "dur", 100);
+      durationShields = tickShieldSelfAction(durationShields);
+      durationShields = tickShieldSelfAction(durationShields);
+      durationShields = tickShieldSelfAction(durationShields);
+      const durationOk = durationShields.length === 0;
+      tests.push(row("边界异常", "SHIELD-DURATION", "验证护盾持续 3 次自身行动", { initialValue: 100, selfActions: 3 }, true, durationOk, 0, durationOk, stringify(durationShields)));
+
+      const boss = bossBonuses(2);
+      tests.push(row("边界异常", "BOSS-BONUS-01", "验证 Boss 人数补偿公式", { enemyCountAdvantage: 2 }, stringify({ hpBonus: 1.7, statusResistBonus: 1.4, actionGaugeBonus: 1.3 }), stringify(boss), 0, stringify(boss) === stringify({ hpBonus: 1.7, statusResistBonus: 1.4, actionGaugeBonus: 1.3 }), "1v3 对应补偿"));
+
+      const bossAtb = simulateATB({ combatants: [{ name: "Boss", spd: 120, gaugeBonus: boss.actionGaugeBonus }, { name: "Hero", spd: 120 }], ticks: 100, useSoftCap: false });
+      const bossActs = bossAtb.find(item => item.name === "Boss").actionCount;
+      const heroActs = bossAtb.find(item => item.name === "Hero").actionCount;
+      tests.push(row("边界异常", "BOSS-ATB-01", "验证 BossActionGaugeBonus 乘在每 tick 获取速度", { bossSPD: 120, heroSPD: 120, gaugeBonus: 1.3, ticks: 100 }, true, bossActs > heroActs, 0, bossActs > heroActs, `boss=${bossActs}, hero=${heroActs}`));
+
+      const damageMin = computeDamage({ atk: 50, def: 500, skillRate: 1, randomFactor: 1, finalBonus: 1, realmGap: 0 });
+      tests.push(row("边界异常", "DMG-MIN-01", "验证最终伤害至少为 1", { atk: 50, def: 500 }, 1, damageMin, 0, damageMin === 1, "向下取整且最小 1"));
+      const healMin = computeHeal({ healPower: -50, skillRate: 1 });
+      tests.push(row("边界异常", "HEAL-MIN-01", "验证治疗最小为 0", { healPower: -50 }, 0, healMin, 0, healMin === 0, "治疗最小 0"));
+      const shieldMin = computeShield({ healPower: -100, skillRate: 1, flatShield: -20 });
+      tests.push(row("边界异常", "SHIELD-MIN-01", "验证护盾最小为 0", { healPower: -100, flatShield: -20 }, 0, shieldMin, 0, shieldMin === 0, "护盾最小 0"));
+
+      const overflowStats = derivedStats({ Level: 100, STR: 999, AGI: 999, INT: 999, SPI: 999, CHA: 999, LUK: 999, FlatHPBonus: 3000, FlatSPBonus: 3000 });
+      const overflowOk = Object.values(overflowStats).every(value => Number.isFinite(value));
+      tests.push(row("边界异常", "LIMIT-01", "验证 999 级极端属性不溢出", { Level: 100, allStats: 999 }, true, overflowOk, 0, overflowOk, stringify(overflowStats)));
+
+      const negativeStats = derivedStats({ Level: 1, STR: -10, AGI: -5, INT: 0, SPI: -3, CHA: 0, LUK: 0, FlatHPBonus: -20 });
+      const negativeOk = Number.isFinite(negativeStats.MaxHP) && Number.isFinite(negativeStats.SPD);
+      tests.push(row("边界异常", "LIMIT-02", "验证负值输入可计算且不崩溃", { Level: 1, STR: -10, AGI: -5, SPI: -3, FlatHPBonus: -20 }, true, negativeOk, 0, negativeOk, stringify(negativeStats)));
+
+      const conclusionCards = buildConclusionData(
+        progressionData,
+        longBattleScenarios,
+        [
+          { label: "3vBoss-有统御核心", data: bossWithCore },
+          { label: "3vBoss-无统御核心", data: bossWithoutCore }
+        ]
+      );
+      const assetLibrarySummary = summarizeAssetLibrary();
+      const generatedBuildSample = assembleGeneratedBuild("C001", { level: 30 });
+      const generatedBatchTests = runGeneratedBatchTests();
+      const assetLibraryOk = assetLibrarySummary.characters === 100 && assetLibrarySummary.equipments === 100 && assetLibrarySummary.skills === 100;
+      tests.push(row("实际战斗平台", "ASSET-LIB-001", "验证 100/100/100 资产库已建立", assetLibrarySummary, true, assetLibraryOk, 0, assetLibraryOk, stringify(assetLibrarySummary)));
+      const buildAssemblyOk = generatedBuildSample.equipmentIds.length === 4 && generatedBuildSample.skillIds.length === 4;
+      tests.push(row("实际战斗平台", "BUILD-ASM-001", "验证角色原型可组装为可战斗 Build", { characterId: "C001", level: 30 }, true, buildAssemblyOk, 0, buildAssemblyOk, stringify({ equipmentIds: generatedBuildSample.equipmentIds, skillIds: generatedBuildSample.skillIds, stats: generatedBuildSample.stats })));
+      const batchSimulationOk = generatedBatchTests.every(item => item.summary.rounds >= 10 && item.summary.winRate >= 0 && item.summary.winRate <= 1);
+      tests.push(row("实际战斗平台", "BATCH-001", "验证预设批量混合搭配测试可输出摘要", { scenarios: generatedBatchTests.map(item => item.id) }, true, batchSimulationOk, 0, batchSimulationOk, stringify(generatedBatchTests.map(item => ({ id: item.id, winRate: item.summary.winRate, avgDamage: item.summary.avgDamage, avgControl: item.summary.avgControlEffectiveness })))));
+
+      return {
+        results: tests,
+        extras: {
+          progressionData,
+          longBattleScenarios,
+          bossComparison: {
+            withCore: bossWithCore,
+            withoutCore: bossWithoutCore
+          },
+          monteCarloKey,
+          conclusionCards,
+          assetLibrarySummary,
+          generatedBuildSample,
+          generatedBatchTests,
+          assumptions: {
+            growthPlanA: GROWTH_PLAN_A,
+            notes: [
+              "成长方案 A 使用线性缩放到五个等级档。",
+              "最小技能循环仅用于验证体验趋势，不代表最终技能数值。",
+              "控制采用单回合行动压制，不含复杂免疫与递减。"
+            ]
+          }
+        }
+      };
+    }
+
+    function renderAssetLibrary(payload) {
+      const summary = payload.extras.assetLibrarySummary;
+      const assetStats = document.getElementById("assetStats");
+      assetStats.innerHTML = [
+        { label: "角色原型", value: summary.characters },
+        { label: "装备原型", value: summary.equipments },
+        { label: "技能原型", value: summary.skills },
+        { label: "技能族", value: summary.skillFamilies.length }
+      ].map(item => `
+        <div class="stat">
+          <div class="label">${item.label}</div>
+          <div class="value">${item.value}</div>
+        </div>
+      `).join("");
+
+      renderAssetSample(document.getElementById("assetSampleType").value || "characters");
+      renderBuildPreview(payload.extras.generatedBuildSample);
+      renderBatchResults(payload.extras.generatedBatchTests);
+    }
+
+    function renderAssetSample(type) {
+      const list = document.getElementById("assetSampleList");
+      const source = type === "equipments"
+        ? GENERATED_EQUIPMENTS.slice(0, 8).map(item => ({
+            title: `${item.id} ${item.name}`,
+            detail: `${item.slot} / T${item.tier} / ${item.rules.explanation}`,
+            tags: item.tags.slice(0, 4)
+          }))
+        : type === "skills"
+          ? GENERATED_SKILLS.slice(0, 8).map(item => ({
+              title: `${item.id} ${item.name}`,
+              detail: `${item.type} / T${item.tier} / SP ${item.spCost}`,
+              tags: item.tags.slice(0, 4)
+            }))
+          : GENERATED_CHARACTERS.slice(0, 8).map(item => ({
+              title: `${item.id} ${item.name}`,
+              detail: `${item.roleAxis} / realm ${item.realm} / Lv${item.levelBracket}`,
+              tags: item.tags.slice(0, 4)
+            }));
+      list.innerHTML = source.map(item => `
+        <li>
+          <div><strong>${item.title}</strong></div>
+          <div class="subtle">${item.detail}</div>
+          <div>${item.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}</div>
+        </li>
+      `).join("");
+    }
+
+    function renderBuildPreview(build) {
+      const container = document.getElementById("buildPreview");
+      container.innerHTML = `
+        <h3>示例 Build</h3>
+        <div class="subtle">${build.id} / ${build.sourceCharacter.roleAxis} / realm ${build.realm} / Lv${build.level}</div>
+        <p><strong>${build.name}</strong></p>
+        <p>装备：${build.equipments.map(item => item.name).join("、")}</p>
+        <p>技能：${build.skills.map(item => item.name).join("、")}</p>
+        <pre>${escapeHtml(stringify({
+          PATK: round(build.stats.PATK, 1),
+          MATK: round(build.stats.MATK, 1),
+          SPD: round(build.stats.SPD, 1),
+          HEALP: round(build.stats.HEALP, 1),
+          LEAD: round(build.stats.LEAD, 1),
+          TeamAuraBonus: round(build.stats.TeamAuraBonus, 3),
+          SummonInheritance: round(build.stats.SummonInheritance, 3)
+        }))}</pre>
+      `;
+    }
+
+    function safePercent(value, base) {
+      if (!base || base <= 0) return 0;
+      return clamp((value / base) * 100, 0, 100);
+    }
+
+    function formatUnitType(unit) {
+      return String(unit.buildId || "").includes("SUMMON") ? "召唤物" : String(unit.buildId || "").startsWith("GB-") ? "生成 Build" : "模板 Build";
+    }
+
+    function describeBattleEvent(entry) {
+      const actor = entry.actor || "未知单位";
+      const action = entry.action || "unknown";
+      const result = entry.result || {};
+      if (action === "controlled_skip") {
+        return { text: `${actor} 被控制，跳过本次行动。`, tone: "warn" };
+      }
+      if (action === "summonGuard") {
+        return { text: `${actor} 召唤护卫，召唤体生命 ${result.summonHp || 0}，继承系数 ${result.inheritance || 0}。`, tone: "good" };
+      }
+      if (action === "tacticalAura") {
+        return { text: `${actor} 展开光环，团队增益 +${round((result.auraBoost || 0) * 100, 1)}%，持续 ${result.duration || 0} 次行动。`, tone: "good" };
+      }
+      if (result.heal || result.shield) {
+        return { text: `${actor} 释放 ${action}，治疗 ${result.heal || 0}${result.shield ? `，附加护盾 ${result.shield}` : ""}。`, tone: "good" };
+      }
+      if (Object.prototype.hasOwnProperty.call(result, "success")) {
+        return result.success
+          ? { text: `${actor} 施加控制成功，命中率 ${round(result.chance || 0, 1)}%。`, tone: "warn" }
+          : { text: `${actor} 尝试控制失败，命中率 ${round(result.chance || 0, 1)}%。`, tone: "bad" };
+      }
+      if (Object.prototype.hasOwnProperty.call(result, "damage")) {
+        if (!result.hit) return { text: `${actor} 使用 ${action} 未命中目标。`, tone: "bad" };
+        return { text: `${actor} 使用 ${action} 造成 ${result.damage || 0} 伤害${result.absorbed ? `（护盾吸收 ${result.absorbed}）` : ""}${result.crit ? "，暴击" : ""}。`, tone: result.crit ? "good" : "" };
+      }
+      return { text: `${actor} 执行 ${action}。`, tone: "" };
+    }
+
+    function renderBattleScenarioOptions() {
+      const select = document.getElementById("battleScenarioSelect");
+      if (!select) return;
+      select.innerHTML = VISUAL_BATTLE_SCENARIOS.map(item => `<option value="${item.id}">${item.label}</option>`).join("");
+    }
+
+    function getSelectedVisualScenario() {
+      const select = document.getElementById("battleScenarioSelect");
+      const id = select ? select.value : VISUAL_BATTLE_SCENARIOS[0].id;
+      return VISUAL_BATTLE_SCENARIOS.find(item => item.id === id) || VISUAL_BATTLE_SCENARIOS[0];
+    }
+
+    function renderBattleSummary(result, scenario) {
+      const container = document.getElementById("battleSummaryGrid");
+      if (!container || !result) return;
+      const totalHpA = result.units.filter(unit => unit.team === "A").reduce((sum, unit) => sum + unit.hp, 0);
+      const totalHpB = result.units.filter(unit => unit.team === "B").reduce((sum, unit) => sum + unit.hp, 0);
+      const cards = [
+        { label: "演示场景", value: scenario.label },
+        { label: "战斗结果", value: result.winner === "A" ? "A 队胜利" : "B 队胜利", cls: result.winner === "A" ? "good" : "bad" },
+        { label: "推进 tick", value: result.ticksUsed },
+        { label: "总行动数", value: result.totalActions },
+        { label: "A 队剩余总 HP", value: round(totalHpA, 0) },
+        { label: "B 队剩余总 HP", value: round(totalHpB, 0) }
+      ];
+      container.innerHTML = cards.map(item => `
+        <div class="summary-pill">
+          <div class="label">${item.label}</div>
+          <div class="value ${item.cls || ""}">${item.value}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderBattleBoard(result) {
+      const board = document.getElementById("battleBoard");
+      if (!board || !result) return;
+      const renderTeam = team => {
+        const members = result.units.filter(unit => unit.team === team);
+        const alive = members.filter(unit => unit.hp > 0).length;
+        const totalHp = members.reduce((sum, unit) => sum + unit.hp, 0);
+        const totalMaxHp = members.reduce((sum, unit) => sum + unit.maxHp, 0);
+        return `
+          <div class="team-panel ${team === "A" ? "ally" : "enemy"}">
+            <div class="team-header">
+              <div>
+                <h3>${team === "A" ? "A 队" : "B 队"}</h3>
+                <div class="subtle">存活 ${alive}/${members.length} · 总 HP ${round(totalHp, 0)}/${round(totalMaxHp, 0)}</div>
+              </div>
+              <div class="mini-tag ${alive === 0 ? "bad" : ""}">${alive === 0 ? "已团灭" : "仍在作战"}</div>
+            </div>
+            <div class="team-members">
+              ${members.map(unit => {
+                const shieldValue = (unit.metrics && unit.metrics.shieldDone) || 0;
+                const hpPercent = safePercent(unit.hp, unit.maxHp);
+                const spPercent = safePercent(unit.sp, unit.maxSp || 1);
+                const burstPercent = clamp(unit.burst || 0, 0, 100);
+                const shieldPercent = safePercent(Math.min(shieldValue, unit.maxHp), unit.maxHp || 1);
+                return `
+                  <div class="unit-card ${unit.hp <= 0 ? "defeated" : ""}">
+                    <div class="unit-topline">
+                      <div>
+                        <div class="unit-name">${unit.name}</div>
+                        <div class="unit-meta">${formatUnitType(unit)} · ${unit.buildId}</div>
+                      </div>
+                      <div class="unit-meta">行动 ${unit.actions}</div>
+                    </div>
+                    <div class="resource-row">
+                      <div class="resource-head"><span>HP</span><span>${round(unit.hp, 0)} / ${unit.maxHp}</span></div>
+                      <div class="bar-track"><div class="bar-fill hp" style="width:${hpPercent}%;"></div></div>
+                    </div>
+                    <div class="resource-row">
+                      <div class="resource-head"><span>SP</span><span>${round(unit.sp, 0)} / ${unit.maxSp}</span></div>
+                      <div class="bar-track"><div class="bar-fill sp" style="width:${spPercent}%;"></div></div>
+                    </div>
+                    <div class="resource-row">
+                      <div class="resource-head"><span>Burst</span><span>${round(unit.burst, 0)} / 100</span></div>
+                      <div class="bar-track"><div class="bar-fill burst" style="width:${burstPercent}%;"></div></div>
+                    </div>
+                    <div class="resource-row">
+                      <div class="resource-head"><span>累计护盾贡献</span><span>${round(shieldValue, 0)}</span></div>
+                      <div class="bar-track"><div class="bar-fill shield" style="width:${shieldPercent}%;"></div></div>
+                    </div>
+                    <div class="unit-tags">
+                      <span class="mini-tag">输出 ${round(unit.metrics.damageDone, 0)}</span>
+                      <span class="mini-tag">治疗 ${round(unit.metrics.healingDone, 0)}</span>
+                      <span class="mini-tag warn">控成 ${unit.controlled}</span>
+                      <span class="mini-tag ${unit.metrics.spExhausted ? "bad" : ""}">SP 断档 ${unit.metrics.spExhausted}</span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+      };
+      board.innerHTML = `${renderTeam("A")}${renderTeam("B")}`;
+    }
+
+    function renderBattleLog(result) {
+      const panel = document.getElementById("battleLog");
+      if (!panel || !result) return;
+      panel.innerHTML = result.timeline.map(entry => {
+        const desc = describeBattleEvent(entry);
+        return `
+          <div class="event-item ${desc.tone}">
+            <div class="event-tick">Tick ${entry.tick}</div>
+            <div>${desc.text}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderBattleCharts(result) {
+      const panel = document.getElementById("battleCharts");
+      if (!panel || !result) return;
+      const metrics = [
+        { label: "总输出", a: result.aggregate.allyDamage, b: result.aggregate.enemyDamage },
+        { label: "总治疗", a: result.aggregate.allyHealing, b: result.units.filter(unit => unit.team === "B").reduce((sum, unit) => sum + unit.metrics.healingDone, 0) },
+        { label: "护盾贡献", a: result.aggregate.allyShield, b: result.units.filter(unit => unit.team === "B").reduce((sum, unit) => sum + unit.metrics.shieldDone, 0) },
+        { label: "控制成功", a: result.units.filter(unit => unit.team === "A").reduce((sum, unit) => sum + unit.metrics.controlSuccess, 0), b: result.units.filter(unit => unit.team === "B").reduce((sum, unit) => sum + unit.metrics.controlSuccess, 0) }
+      ];
+      panel.innerHTML = metrics.map(item => {
+        const total = Math.max(1, item.a + item.b);
+        const aWidth = round((item.a / total) * 100, 2);
+        const bWidth = round((item.b / total) * 100, 2);
+        return `
+          <div class="chart-row">
+            <div class="chart-label"><strong>${item.label}</strong><span>A ${round(item.a, 0)} / B ${round(item.b, 0)}</span></div>
+            <div class="chart-stack">
+              <div class="chart-segment a" style="width:${aWidth}%;"></div>
+              <div class="chart-segment b" style="width:${bWidth}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderBattleDetailPanel(result, scenario) {
+      const panel = document.getElementById("battleDetailPanel");
+      if (!panel || !result) return;
+      const keyUsage = Object.entries(result.aggregate.skillUsage).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      panel.innerHTML = `
+        <h3>单场详情汇总</h3>
+        <div class="detail-card">
+          <div class="subtle">${scenario.description}</div>
+          <p><strong>阵容</strong></p>
+          <p>A：${scenario.allies.join("、")}</p>
+          <p>B：${scenario.enemies.join("、")}</p>
+        </div>
+        <div style="height:10px;"></div>
+        <div class="detail-card">
+          <p><strong>关键统计</strong></p>
+          <ul>
+            <li>控制成功率：${round(result.aggregate.controlUptime * 100, 2)}%</li>
+            <li>Burst 释放次数：${result.aggregate.burstCasts}</li>
+            <li>SP 断档次数：${result.aggregate.spExhausted}</li>
+            <li>A 队光环总值：${result.aggregate.teamAuraTotalA}</li>
+            <li>B 队光环总值：${result.aggregate.teamAuraTotalB}</li>
+          </ul>
+        </div>
+        <div style="height:10px;"></div>
+        <div class="detail-card">
+          <p><strong>高频技能</strong></p>
+          <ul>${keyUsage.map(([key, value]) => `<li>${key}: ${value}</li>`).join("") || "<li>无</li>"}</ul>
+        </div>
+      `;
+    }
+
+    function renderSingleBattle(result, scenario) {
+      renderBattleSummary(result, scenario);
+      renderBattleBoard(result);
+      renderBattleLog(result);
+      renderBattleCharts(result);
+      renderBattleDetailPanel(result, scenario);
+    }
+
+    function renderBatchResults(batches) {
+      const summary = document.getElementById("batchSummary");
+      const batchVisualSummary = document.getElementById("batchVisualSummary");
+      const avgWinRate = round(batches.reduce((sum, item) => sum + item.summary.winRate, 0) / Math.max(1, batches.length), 4);
+      const avgDamage = round(batches.reduce((sum, item) => sum + item.summary.avgDamage, 0) / Math.max(1, batches.length), 2);
+      const avgControl = round(batches.reduce((sum, item) => sum + item.summary.avgControlEffectiveness, 0) / Math.max(1, batches.length), 4);
+      summary.innerHTML = `
+        <h3>批量测试摘要</h3>
+        <p>预设批次：${batches.length} 组；平均 A 侧胜率：${round(avgWinRate * 100, 2)}%；平均输出：${avgDamage}</p>
+        <p class="subtle">覆盖目标：同层级平衡、统御/治疗协同、高波动压力、越阶压制。</p>
+      `;
+      if (batchVisualSummary) {
+        batchVisualSummary.innerHTML = `
+          <h3>批量摘要可视视图</h3>
+          <div class="battle-summary-grid">
+            <div class="summary-pill"><div class="label">场景总数</div><div class="value">${batches.length}</div></div>
+            <div class="summary-pill"><div class="label">平均 A 胜率</div><div class="value">${round(avgWinRate * 100, 2)}%</div></div>
+            <div class="summary-pill"><div class="label">平均输出</div><div class="value">${avgDamage}</div></div>
+            <div class="summary-pill"><div class="label">平均控制效率</div><div class="value">${round(avgControl * 100, 2)}%</div></div>
+          </div>
+          <div class="chart-list">
+            ${batches.map(item => `
+              <div class="chart-row">
+                <div class="chart-label"><strong>${item.label}</strong><span>胜率 ${round(item.summary.winRate * 100, 2)}% · 平均输出 ${item.summary.avgDamage}</span></div>
+                <div class="chart-stack">
+                  <div class="chart-segment a" style="width:${round(item.summary.winRate * 100, 2)}%;"></div>
+                  <div class="chart-segment b" style="width:${round((1 - item.summary.winRate) * 100, 2)}%;"></div>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      }
+      const body = document.getElementById("batchResultBody");
+      body.innerHTML = batches.map(item => `
+        <tr>
+          <td class="mono">${item.id}</td>
+          <td>${item.goal}</td>
+          <td>${item.summary.rounds}</td>
+          <td>${round(item.summary.winRate * 100, 2)}%</td>
+          <td>${item.summary.avgBattleLength}</td>
+          <td>${item.summary.avgDamage}</td>
+          <td>${item.summary.sampleFirst.aggregate.allyHealing}</td>
+          <td>${round(item.summary.avgControlEffectiveness * 100, 2)}%</td>
+          <td><pre>${escapeHtml(stringify({ allies: item.allies, enemies: item.enemies }))}</pre></td>
+        </tr>
+      `).join("");
+    }
+
+    function render(payload) {
+      const results = payload.results;
+      const passed = results.filter(item => item.pass).length;
+      const failed = results.length - passed;
+      const grouped = results.reduce((acc, item) => {
+        acc[item.layer] = (acc[item.layer] || 0) + 1;
+        return acc;
+      }, {});
+
+      const stats = document.getElementById("stats");
+      stats.innerHTML = [
+        { label: "总测试数", value: results.length, cls: "" },
+        { label: "通过", value: passed, cls: "good" },
+        { label: "失败", value: failed, cls: failed ? "bad" : "good" },
+        ...Object.entries(grouped).map(([label, value]) => ({ label, value, cls: "" }))
+      ].map(item => `
+        <div class="stat">
+          <div class="label">${item.label}</div>
+          <div class="value ${item.cls}">${item.value}</div>
+        </div>
+      `).join("");
+
+      const cards = document.getElementById("insightCards");
+      cards.innerHTML = payload.extras.conclusionCards.map(card => `
+        <div class="summary-card">
+          <h3>${card.title}</h3>
+          <ul>${card.bullets.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      `).join("");
+
+      const body = document.getElementById("resultBody");
+      body.innerHTML = results.map(item => `
+        <tr>
+          <td class="mono">${item.id}</td>
+          <td>${item.layer}</td>
+          <td>${item.goal}</td>
+          <td><pre>${escapeHtml(stringify(item.input))}</pre></td>
+          <td><pre>${escapeHtml(typeof item.expected === 'string' ? item.expected : stringify(item.expected))}</pre></td>
+          <td><pre>${escapeHtml(typeof item.actual === 'string' ? item.actual : stringify(item.actual))}</pre></td>
+          <td>${item.tolerance}</td>
+          <td class="${item.pass ? 'good' : 'bad'}">${item.pass ? '通过' : '失败'}</td>
+          <td><pre>${escapeHtml(item.note || '')}</pre></td>
+        </tr>
+      `).join("");
+
+      renderAssetLibrary(payload);
+      renderBattleScenarioOptions();
+      runVisualBattle(false);
+      setVisualMode(document.body.dataset.visualMode || "single");
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&")
+        .replace(/</g, "<")
+        .replace(/>/g, ">");
+    }
+
+    let latestPayload = null;
+
+    function runAllTests() {
+      latestPayload = generateTests();
+      render(latestPayload);
+    }
+
+    function downloadReport() {
+      if (!latestPayload) runAllTests();
+      const payload = {
+        generatedAt: new Date().toISOString(),
+        total: latestPayload.results.length,
+        passed: latestPayload.results.filter(item => item.pass).length,
+        failed: latestPayload.results.filter(item => !item.pass).length,
+        results: latestPayload.results,
+        extras: latestPayload.extras
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "battle_test_report.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function refreshAssetSample() {
+      renderAssetSample(document.getElementById("assetSampleType").value || "characters");
+    }
+
+    function cycleBuildPreview() {
+      const currentIndex = Number(document.body.dataset.generatedBuildIndex || 0);
+      const nextIndex = (currentIndex + 1) % GENERATED_CHARACTERS.length;
+      document.body.dataset.generatedBuildIndex = String(nextIndex);
+      const build = assembleGeneratedBuild(GENERATED_CHARACTERS[nextIndex].id, { level: GENERATED_CHARACTERS[nextIndex].levelBracket });
+      renderBuildPreview(build);
+    }
+
+    function rerunGeneratedBatch() {
+      if (!latestPayload) runAllTests();
+      latestPayload.extras.generatedBatchTests = runGeneratedBatchTests();
+      renderBatchResults(latestPayload.extras.generatedBatchTests);
+    }
+
+    function runVisualBattle(useSelectedScenario = true) {
+      if (!latestPayload) runAllTests();
+      const scenario = useSelectedScenario ? getSelectedVisualScenario() : (latestPayload.extras.visualBattleResult && latestPayload.extras.visualBattleScenario) || VISUAL_BATTLE_SCENARIOS[0];
+      const actualScenario = useSelectedScenario ? scenario : (latestPayload.extras.visualBattleScenario || scenario);
+      const result = simulateTeamBattle(actualScenario);
+      latestPayload.extras.visualBattleScenario = actualScenario;
+      latestPayload.extras.visualBattleResult = result;
+      renderSingleBattle(result, actualScenario);
+    }
+
+    function setVisualMode(mode) {
+      document.body.dataset.visualMode = mode;
+      const singleBtn = document.getElementById("showSingleBattleBtn");
+      const batchBtn = document.getElementById("showBatchViewBtn");
+      const singleView = document.getElementById("singleBattleView");
+      const batchView = document.getElementById("batchBattleView");
+      const singleActive = mode !== "batch";
+      singleView.classList.toggle("active", singleActive);
+      batchView.classList.toggle("active", !singleActive);
+      singleBtn.classList.toggle("active", singleActive);
+      batchBtn.classList.toggle("active", !singleActive);
+      singleBtn.classList.toggle("secondary", singleActive);
+      singleBtn.classList.toggle("ghost", !singleActive);
+      batchBtn.classList.toggle("secondary", !singleActive);
+      batchBtn.classList.toggle("ghost", singleActive);
+    }
+
+    document.getElementById("runBtn").addEventListener("click", runAllTests);
+    document.getElementById("downloadBtn").addEventListener("click", downloadReport);
+    document.getElementById("sampleAssetBtn").addEventListener("click", refreshAssetSample);
+    document.getElementById("assembleBuildBtn").addEventListener("click", cycleBuildPreview);
+    document.getElementById("runBatchBtn").addEventListener("click", rerunGeneratedBatch);
+    document.getElementById("assetSampleType").addEventListener("change", refreshAssetSample);
+    document.getElementById("runSingleBattleBtn").addEventListener("click", () => runVisualBattle(true));
+    document.getElementById("showSingleBattleBtn").addEventListener("click", () => setVisualMode("single"));
+    document.getElementById("showBatchViewBtn").addEventListener("click", () => setVisualMode("batch"));
+    document.getElementById("battleScenarioSelect").addEventListener("change", () => runVisualBattle(true));
+    runAllTests();
+  </script>
+</body>
+</html>
