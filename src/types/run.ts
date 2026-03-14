@@ -36,7 +36,15 @@ export type RunSaveMeta = {
   autoSaveCount: number;
 };
 
-export type RunScreen = 'title' | 'start' | 'map' | 'event' | 'recruit' | 'battle';
+export type RunScreen = 'title' | 'start' | 'map' | 'event' | 'recruit' | 'battle' | 'result';
+
+export type RunOutcome = 'victory' | 'defeat';
+
+export type RunResultState = {
+  outcome: RunOutcome;
+  summary: string;
+  finalNodeId: Identifier | null;
+};
 
 export type RunEncounterState = {
   nodeId: Identifier;
@@ -74,6 +82,7 @@ export type RunState = {
   availableEvents: readonly EventTemplate[];
   availableBattles: readonly BattleTemplate[];
   completedNodeResults: readonly ResolvedNodeResult[];
+  result: RunResultState | null;
   save: RunSaveMeta;
   presentation: RunPresentationState;
 };

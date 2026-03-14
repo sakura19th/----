@@ -7,10 +7,10 @@ export type Rarity = 'common' | 'elite' | 'boss';
 export type RelationshipLevel = 'support' | 'neutral' | 'dislike';
 
 export type ResourcePool = {
-  hp: number;
-  maxHp: number;
-  sp: number;
-  maxSp: number;
+  hp?: number;
+  maxHp?: number;
+  sp?: number;
+  maxSp?: number;
 };
 
 export type BaseAttributes = {

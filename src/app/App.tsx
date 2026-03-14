@@ -4,6 +4,7 @@ import { BattleScreen } from '../screens/battle/BattleScreen';
 import { EventScreen } from '../screens/event/EventScreen';
 import { MapScreen } from '../screens/map/MapScreen';
 import { RecruitScreen } from '../screens/recruit/RecruitScreen';
+import { ResultScreen } from '../screens/result/ResultScreen';
 import { StartScreen } from '../screens/start/StartScreen';
 import { TitleScreen } from '../screens/title/TitleScreen';
 import { getGameStore, useGameStore } from './store/useGameStore';
@@ -15,7 +16,7 @@ export function App() {
     getGameStore().getState().boot();
   }, []);
 
-  let screen = <TitleScreen onStart={store.enterStart} />;
+  let screen = <TitleScreen onStart={store.enterStart} onDeleteSave={store.deleteSave} hasSave={store.run !== null} />;
 
   if (store.screen === 'start') {
     screen = <StartScreen onStartRun={store.startNewRun} onBackToTitle={store.returnToTitle} />;
@@ -33,7 +34,9 @@ export function App() {
   } else if (store.screen === 'recruit' && store.run) {
     screen = <RecruitScreen run={store.run} onChoose={store.chooseEvent} />;
   } else if (store.screen === 'battle' && store.run) {
-    screen = <BattleScreen run={store.run} onSubmitAction={store.submitBattleAction} onBackToMap={store.leaveBattleToMap} />;
+    screen = <BattleScreen run={store.run} onSubmitAction={store.submitBattleAction} onBackToMap={store.leaveBattleToMap} onFleeBattle={store.fleeBattle} />;
+  } else if (store.screen === 'result' && store.run) {
+    screen = <ResultScreen run={store.run} onReturnToTitle={store.returnToTitle} />;
   }
 
   return <ScreenFrame>{screen}</ScreenFrame>;

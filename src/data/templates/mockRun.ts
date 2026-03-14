@@ -6,13 +6,24 @@ import {
   RECRUIT_ARCHETYPES,
 } from '..';
 import type { CharacterTemplate, PartyMember, RunState } from '../../types';
+import { deriveCombatStats } from '../../domain/formulas/deriveCombatStats';
 
 function toPartyMember(template: CharacterTemplate, index: number): PartyMember {
+  const level = 1;
+  const derived = deriveCombatStats({ ...template.stats, level });
+
   return {
     ...template,
+    stats: {
+      ...template.stats,
+      hp: derived.maxHp,
+      maxHp: derived.maxHp,
+      sp: derived.maxSp,
+      maxSp: derived.maxSp,
+    },
     instanceId: `${template.identity.id}-instance-${index + 1}`,
     progression: {
-      level: 1,
+      level,
       xp: 0,
       growthBias: {
         value: 'attack',
@@ -62,6 +73,7 @@ export const MOCK_RUN_STATE: RunState = {
       summary: 'Stage1 mock：断裂商队节点已作为已完成占位。',
     },
   ],
+  result: null,
   save: {
     slotId: 'stage1-mock-slot',
     lastSavedAt: null,

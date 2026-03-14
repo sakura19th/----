@@ -295,12 +295,7 @@ function spendSkillCost(actor: BattleUnitState, skill: SkillTemplate | null) {
   };
 }
 
-function regenSp(actor: BattleUnitState) {
-  return {
-    ...actor,
-    currentSp: clamp(actor.currentSp + actor.derived.SPRegenPerAction, 0, actor.maxSp),
-  };
-}
+// SP 回复机制已移除：技能消耗 SP 是唯一的 SP 变动途径
 
 function createGuardStatus(actor: BattleUnitState, state: BattleState) {
   return {
@@ -799,7 +794,7 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
   }
 
   currentActor = getUnit(state, currentActor.unitId) ?? currentActor;
-  currentActor = regenSp({
+  currentActor = {
     ...currentActor,
     runtime: {
       ...currentActor.runtime,
@@ -807,7 +802,7 @@ export function resolveTurn(input: ResolveTurnInput): ResolveTurnResult {
     },
     hasActedThisRound: true,
     shields: cleanupShields(currentActor.shields),
-  });
+  };
   state = {
     ...state,
     units: replaceUnit(state.units, currentActor),

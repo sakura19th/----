@@ -1,4 +1,5 @@
-import type { RunState } from '../../types';
+import type { PartyMember, RunState } from '../../types';
+import { deriveCombatStats } from '../../domain/formulas/deriveCombatStats';
 
 type MapScreenProps = {
   run: RunState;
@@ -6,6 +7,15 @@ type MapScreenProps = {
   onOpenNode: () => void;
   onBackToTitle: () => void;
 };
+
+function getMemberResources(member: PartyMember) {
+  const derived = deriveCombatStats({ ...member.stats, level: member.progression?.level ?? 1 });
+  const maxHp = derived.maxHp;
+  const maxSp = derived.maxSp;
+  const hp = member.stats.hp ?? maxHp;
+  const sp = member.stats.sp ?? maxSp;
+  return { hp: Math.min(hp, maxHp), maxHp, sp: Math.min(sp, maxSp), maxSp };
+}
 
 function getNodeLabel(status: RunState['map']['nodes'][number]['status']) {
   switch (status) {
@@ -71,7 +81,7 @@ export function MapScreen({ run, onSelectNode, onOpenNode, onBackToTitle }: MapS
                   {member.classKey} · {member.role} · 关系 {member.currentRelationToLeader}
                 </span>
                 <span>
-                  HP {member.stats.hp}/{member.stats.maxHp} · SP {member.stats.sp}/{member.stats.maxSp}
+                  {(() => { const r = getMemberResources(member); return `HP ${r.hp}/${r.maxHp} · SP ${r.sp}/${r.maxSp}`; })()}
                 </span>
                 <span>状态：{member.activeStatusEffects.length > 0 ? member.activeStatusEffects.join('、') : '无'}</span>
               </article>

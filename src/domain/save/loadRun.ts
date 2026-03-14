@@ -21,3 +21,9 @@ export function loadRun(): RunState | null {
     return null;
   }
 }
+
+export function deleteRun(): void {
+  if (hasLocalStorage()) {
+    window.localStorage.removeItem(STAGE2_AUTOSAVE_KEY);
+  }
+}

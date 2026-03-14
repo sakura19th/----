@@ -1,4 +1,5 @@
 import type { BattleRewardPayload, PartyMember } from '../../types';
+import { deriveCombatStats } from '../formulas/deriveCombatStats';
 
 export type ResourceRewardInput = {
   shards?: number;
@@ -16,6 +17,17 @@ export type RewardApplicationResult = {
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
+}
+
+/**
+ * 用公式计算成员的 maxHp / maxSp（与战斗中一致）。
+ */
+function getMemberResourceCaps(member: PartyMember) {
+  const derived = deriveCombatStats({
+    ...member.stats,
+    level: member.progression?.level ?? 1,
+  });
+  return { maxHp: derived.maxHp, maxSp: derived.maxSp };
 }
 
 function applyBattleSurvivorState(party: readonly PartyMember[], battleReward: BattleRewardPayload | null | undefined) {
@@ -39,14 +51,18 @@ function applyBattleSurvivorState(party: readonly PartyMember[], battleReward: B
       return member;
     }
 
+    // 战斗后直接使用公式体系的值回写到 stats
+    // survivor.hp / survivor.maxHp 就是战斗公式体系的值
+    const caps = getMemberResourceCaps(member);
+
     return {
       ...member,
       stats: {
         ...member.stats,
-        hp: clamp(survivor.hp, 0, survivor.maxHp),
-        maxHp: survivor.maxHp,
-        sp: clamp(survivor.sp, 0, survivor.maxSp),
-        maxSp: survivor.maxSp,
+        hp: clamp(survivor.hp, 0, caps.maxHp),
+        maxHp: caps.maxHp,
+        sp: clamp(survivor.sp, 0, caps.maxSp),
+        maxSp: caps.maxSp,
       },
       activeStatusEffects: survivor.alive ? member.activeStatusEffects : [],
     };
@@ -58,14 +74,22 @@ export function applyResourceRewards(
   rewards: ResourceRewardInput,
 ): RewardApplicationResult {
   const battlePatchedParty = applyBattleSurvivorState(party, rewards.battleReward);
-  const nextParty = battlePatchedParty.map((member) => ({
-    ...member,
-    stats: {
-      ...member.stats,
-      hp: rewards.hp === undefined ? member.stats.hp : clamp(member.stats.hp + rewards.hp, 0, member.stats.maxHp),
-      sp: rewards.sp === undefined ? member.stats.sp : clamp(member.stats.sp + rewards.sp, 0, member.stats.maxSp),
-    },
-  }));
+  const nextParty = battlePatchedParty.map((member) => {
+    const caps = getMemberResourceCaps(member);
+    const currentHp = member.stats.hp ?? caps.maxHp;
+    const currentSp = member.stats.sp ?? caps.maxSp;
+
+    return {
+      ...member,
+      stats: {
+        ...member.stats,
+        hp: rewards.hp === undefined ? currentHp : clamp(currentHp + rewards.hp, 0, caps.maxHp),
+        maxHp: caps.maxHp,
+        sp: rewards.sp === undefined ? currentSp : clamp(currentSp + rewards.sp, 0, caps.maxSp),
+        maxSp: caps.maxSp,
+      },
+    };
+  });
 
   return {
     party: nextParty,

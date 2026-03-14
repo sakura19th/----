@@ -4,7 +4,7 @@ import { resolveTurn } from '../../domain/battle/resolveTurn';
 import { applyResourceRewards } from '../../domain/reward/applyRewards';
 import { createRun } from '../../domain/run/createRun';
 import { getRecruitTemplate, getResolvableEvent, resolveNode } from '../../domain/run/resolveNode';
-import { loadRun } from '../../domain/save/loadRun';
+import { deleteRun, loadRun } from '../../domain/save/loadRun';
 import { saveRun } from '../../domain/save/saveRun';
 import type { BattleState, EnemyTemplate, EventChoice, Identifier, RunEncounterState, RunScreen, RunState } from '../../types';
 
@@ -27,6 +27,8 @@ export type GameStore = {
   dismissRecruitNotice: () => void;
   submitBattleAction: (command: BattleCommand) => void;
   leaveBattleToMap: () => void;
+  deleteSave: () => void;
+  fleeBattle: () => void;
 };
 
 type Listener = () => void;
@@ -55,6 +57,8 @@ function createInitialStore(): GameStore {
     dismissRecruitNotice: () => undefined,
     submitBattleAction: () => undefined,
     leaveBattleToMap: () => undefined,
+    deleteSave: () => undefined,
+    fleeBattle: () => undefined,
   };
 }
 
@@ -172,8 +176,12 @@ function finishBattle(run: RunState, battleState: BattleState): RunState {
   const rewardResult = applyResourceRewards(run.party, {
     battleReward: battleState.result.reward,
   });
-
-  const outcomeText = battleState.result.outcome === 'victory' ? '战斗胜利，已回收本次奖励。' : '队伍败退，已返回地图。';
+  const isBossEncounter = run.presentation.pendingEncounter?.battleId === 'battle-fallen-observatory';
+  const isVictory = battleState.result.outcome === 'victory';
+  const outcomeText = isVictory ? '战斗胜利，已回收本次奖励。' : '队伍败退，已返回地图。';
+  const bossResultSummary = isVictory
+    ? `${battleState.metadata?.battleName ?? '终局战斗'} 已完成，队伍成功打通本局闭环。`
+    : `${battleState.metadata?.battleName ?? '终局战斗'} 失败，本局在 Boss 节点结束。`;
 
   return {
     ...run,
@@ -188,17 +196,26 @@ function finishBattle(run: RunState, battleState: BattleState): RunState {
         ? {
             ...result,
             battleResult: battleState.result,
-            summary: `${result.summary} ${outcomeText}`,
+            summary: isBossEncounter ? bossResultSummary : `${result.summary} ${outcomeText}`,
           }
         : result,
     ),
+    result: isBossEncounter
+      ? {
+          outcome: isVictory ? 'victory' : 'defeat',
+          summary: bossResultSummary,
+          finalNodeId: run.presentation.pendingEncounter?.nodeId ?? null,
+        }
+      : run.result,
     presentation: {
       ...run.presentation,
-      activeScreen: 'map',
+      activeScreen: isBossEncounter ? 'result' : 'map',
       pendingEncounter: null,
       battleContext: null,
-      resultMessage:
-        battleState.result.outcome === 'victory'
+      currentEvent: null,
+      resultMessage: isBossEncounter
+        ? bossResultSummary
+        : isVictory
           ? `${battleState.metadata?.battleName ?? '战斗'} 胜利，获得碎晶 ${rewardResult.gainedShards}${rewardResult.gainedSupply ? `，补给 ${rewardResult.gainedSupply}` : ''}。`
           : `${battleState.metadata?.battleName ?? '战斗'} 失败，队伍状态已同步回地图。`,
     },
@@ -410,6 +427,32 @@ export function createGameStore() {
             ...run.presentation,
             activeScreen: 'map',
             battleContext: null,
+          },
+        };
+      });
+    },
+    deleteSave: () => {
+      deleteRun();
+      setState((current) => ({
+        ...current,
+        run: null,
+        screen: 'title',
+      }));
+    },
+    fleeBattle: () => {
+      updateRun((run) => {
+        if (!run.presentation.battleContext?.battleState) {
+          return run;
+        }
+
+        return {
+          ...run,
+          presentation: {
+            ...run.presentation,
+            activeScreen: 'map',
+            battleContext: null,
+            pendingEncounter: null,
+            resultMessage: '队伍撤退，已返回地图。',
           },
         };
       });

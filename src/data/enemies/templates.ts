@@ -40,10 +40,6 @@ export const ENEMY_TEMPLATES = [
     role: 'striker',
     rarity: 'common',
     stats: {
-      hp: 24,
-      maxHp: 24,
-      sp: 5,
-      maxSp: 5,
       attack: 8,
       defense: 3,
       speed: 8,
@@ -74,10 +70,6 @@ export const ENEMY_TEMPLATES = [
     role: 'striker',
     rarity: 'common',
     stats: {
-      hp: 22,
-      maxHp: 22,
-      sp: 4,
-      maxSp: 4,
       attack: 9,
       defense: 2,
       speed: 9,
@@ -108,10 +100,6 @@ export const ENEMY_TEMPLATES = [
     role: 'controller',
     rarity: 'common',
     stats: {
-      hp: 26,
-      maxHp: 26,
-      sp: 8,
-      maxSp: 8,
       attack: 4,
       defense: 4,
       speed: 5,
@@ -142,10 +130,6 @@ export const ENEMY_TEMPLATES = [
     role: 'frontline',
     rarity: 'common',
     stats: {
-      hp: 34,
-      maxHp: 34,
-      sp: 5,
-      maxSp: 5,
       attack: 6,
       defense: 9,
       speed: 3,
@@ -176,10 +160,6 @@ export const ENEMY_TEMPLATES = [
     role: 'controller',
     rarity: 'common',
     stats: {
-      hp: 25,
-      maxHp: 25,
-      sp: 9,
-      maxSp: 9,
       attack: 4,
       defense: 3,
       speed: 6,
@@ -210,10 +190,6 @@ export const ENEMY_TEMPLATES = [
     role: 'controller',
     rarity: 'elite',
     stats: {
-      hp: 72,
-      maxHp: 72,
-      sp: 12,
-      maxSp: 12,
       attack: 10,
       defense: 8,
       speed: 6,
@@ -258,6 +234,6 @@ export const BATTLE_TEMPLATES = [
     name: '坠落观测台',
     recommendedPower: 60,
     enemyIds: ['enemy-hollow-oracle', 'enemy-boss-shard-tyrant'],
-    battlefieldTag: '漂浮圣坛',
+    battlefieldTag: '坠落观测台',
   },
 ] as const satisfies readonly BattleTemplate[];

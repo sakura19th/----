@@ -1,5 +1,6 @@
 import { BATTLE_TEMPLATES, EVENT_TEMPLATES, HERO_ARCHETYPES, RECRUIT_ARCHETYPES } from '../../data';
 import type { CharacterTemplate, PartyMember, RunState } from '../../types';
+import { deriveCombatStats } from '../formulas/deriveCombatStats';
 import { generateMap } from './generateMap';
 
 export type CreateRunInput = {
@@ -7,12 +8,35 @@ export type CreateRunInput = {
   seed?: string;
 };
 
+/**
+ * 用公式从基础属性计算 maxHp/maxSp，并设置为满血满SP状态。
+ */
+function computeResourceStats(template: CharacterTemplate, level: number) {
+  const derived = deriveCombatStats({
+    ...template.stats,
+    level,
+  });
+  return {
+    hp: derived.maxHp,
+    maxHp: derived.maxHp,
+    sp: derived.maxSp,
+    maxSp: derived.maxSp,
+  };
+}
+
 function toPartyMember(template: CharacterTemplate, index: number): PartyMember {
+  const level = 1;
+  const resources = computeResourceStats(template, level);
+
   return {
     ...template,
+    stats: {
+      ...template.stats,
+      ...resources,
+    },
     instanceId: `${template.identity.id}-run-${index + 1}`,
     progression: {
-      level: 1,
+      level,
       xp: 0,
       growthBias: {
         value: 'attack',
@@ -37,7 +61,7 @@ export function createRun(input: CreateRunInput = {}): RunState {
   return {
     snapshot: {
       stage: 'stage2',
-      version: '0.2.0-stage2',
+      version: '0.5.0-stage5',
       seed: {
         runSeed: buildSeed(input.seed),
         worldShard: '碎片世界-北境回廊',
@@ -54,8 +78,9 @@ export function createRun(input: CreateRunInput = {}): RunState {
     availableEvents: EVENT_TEMPLATES,
     availableBattles: BATTLE_TEMPLATES,
     completedNodeResults: [],
+    result: null,
     save: {
-      slotId: 'autosave-stage2',
+      slotId: 'autosave-stage5',
       lastSavedAt: null,
       autoSaveCount: 0,
     },

@@ -6,6 +6,7 @@ type BattleScreenProps = {
   run: RunState;
   onSubmitAction: (command: BattleCommand) => void;
   onBackToMap: () => void;
+  onFleeBattle: () => void;
 };
 
 function formatStatuses(unit: BattleUnitState) {
@@ -38,7 +39,7 @@ function getTargetCandidates(actor: BattleUnitState | null, skill: SkillTemplate
   }
 }
 
-export function BattleScreen({ run, onSubmitAction, onBackToMap }: BattleScreenProps) {
+export function BattleScreen({ run, onSubmitAction, onBackToMap, onFleeBattle }: BattleScreenProps) {
   const battleContext = run.presentation.battleContext;
   if (!battleContext) {
     return null;
@@ -171,6 +172,21 @@ export function BattleScreen({ run, onSubmitAction, onBackToMap }: BattleScreenP
               </article>
             ))}
           </div>
+          {!battleState.result.finished && (
+            <div style={{ marginTop: '0.5rem' }}>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => {
+                  if (window.confirm('确认退出战斗？当前战斗进度将丢失。')) {
+                    onFleeBattle();
+                  }
+                }}
+              >
+                退出战斗
+              </button>
+            </div>
+          )}
         </section>
       </div>
     </section>

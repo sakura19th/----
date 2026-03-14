@@ -1,5 +1,4 @@
 import type {
-  BattleDerivedStats,
   BattleLogEntry,
   BattleResult,
   BattleSide,
@@ -9,6 +8,7 @@ import type {
   CreateBattleStateInput,
   EnemyTemplate,
 } from '../../types';
+import { deriveCombatStats } from '../formulas/deriveCombatStats';
 import { ATB_INITIAL_GAUGE, ATB_THRESHOLD } from './atb';
 import { resolveStageScale, toStagePresetKey } from './stageRules';
 
@@ -19,77 +19,15 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
-function floorMin(value: number, min: number) {
-  return Math.max(min, Math.floor(value));
-}
-
-
-function safeStat(value: number | undefined, fallback = 0) {
-  return Number.isFinite(value) ? Number(value) : fallback;
-}
-
-function extractPrimaryAttributes(unit: BattleUnitTemplateSource) {
-  const strength = safeStat(unit.stats.strength, unit.stats.attack);
-  const agility = safeStat(unit.stats.agility, unit.stats.speed);
-  const intelligence = safeStat(unit.stats.intelligence, unit.stats.spirit);
-  const spirit = safeStat(unit.stats.spiritPower, unit.stats.spirit);
-  const charisma = safeStat(unit.stats.charisma, spirit);
-  const luck = safeStat(unit.stats.luck, 0);
-  const level = 'progression' in unit ? safeStat(unit.progression.level, 1) : 1;
-
-  return {
-    strength,
-    agility,
-    intelligence,
-    spirit,
-    charisma,
-    luck,
+/**
+ * 从单位模板中提取属性并传给共享公式模块。
+ */
+function deriveUnitCombatStats(unit: BattleUnitTemplateSource) {
+  const level = 'progression' in unit ? (unit.progression?.level ?? 1) : 1;
+  return deriveCombatStats({
+    ...unit.stats,
     level,
-  };
-}
-
-function deriveCombatStats(unit: BattleUnitTemplateSource): BattleDerivedStats {
-  const { strength, agility, intelligence, spirit, charisma, luck, level } = extractPrimaryAttributes(unit);
-
-  const maxHp = floorMin(100 + strength * 9 + spirit * 5 + level * 4, 1);
-  const maxSp = floorMin(40 + intelligence * 4 + spirit * 8 + level * 2, 0);
-  const PATK = floorMin(10 + strength * 2.6 + agility * 0.7 + level * 0.5, 0);
-  const MATK = floorMin(10 + intelligence * 2.6 + spirit * 0.8 + level * 0.5, 0);
-  const PDEF = floorMin(5 + strength * 1.2 + agility * 0.5 + level * 0.3, 0);
-  const MDEF = floorMin(5 + spirit * 1.6 + intelligence * 0.6 + level * 0.3, 0);
-  const SPD = floorMin(80 + agility * 2.2 + spirit * 0.3 + luck * 0.2, 1);
-  const HIT = floorMin(100 + agility * 1 + intelligence * 0.4 + level * 0.2, 1);
-  const EVA = floorMin(agility * 0.9 + luck * 0.6 + level * 0.1, 0);
-  const CRIT = 5 + agility * 0.08 + luck * 0.18;
-  const CDMG = 150 + strength * 0.12 + intelligence * 0.12 + luck * 0.1;
-  const AACC = 100 + intelligence * 0.8 + spirit * 0.8 + charisma * 0.6 + luck * 0.2;
-  const ARES = 100 + spirit * 1.2 + charisma * 0.5 + luck * 0.3;
-  const HEALP = floorMin(spirit * 1.8 + intelligence * 0.7 + charisma * 0.7, 0);
-  const LEAD = floorMin(charisma * 1.8 + spirit * 0.6 + luck * 0.2, 0);
-  const TeamAuraBonus = 1 + Math.min(0.2, LEAD / 1000);
-  const SummonInheritance = 0.5 + Math.min(0.35, LEAD / 1000);
-  const SPRegenPerAction = 4 + spirit * 0.15;
-
-  return {
-    maxHp,
-    maxSp,
-    PATK,
-    MATK,
-    PDEF,
-    MDEF,
-    SPD,
-    HIT,
-    EVA,
-    CRIT,
-    CDMG,
-    AACC,
-    ARES,
-    HEALP,
-    LEAD,
-    TeamAuraBonus,
-    SummonInheritance,
-    SPRegenPerAction,
-  };
+  });
 }
 
 function createUnitState(params: {
@@ -100,9 +38,24 @@ function createUnitState(params: {
   skillIds: readonly string[];
 }): BattleUnitState {
   const { unit, side, index, realmTier, skillIds } = params;
-  const derived = deriveCombatStats(unit);
-  const currentHp = clamp(unit.stats.hp, 1, derived.maxHp);
-  const currentSp = clamp(unit.stats.sp, 0, derived.maxSp);
+  const derived = deriveUnitCombatStats(unit);
+
+  // HP/SP：如果模板中已经有 hp/maxHp（由 createRun 公式计算写入），使用其比例；
+  // 否则（如敌人模板，没有 hp/maxHp）默认满血满SP。
+  const templateHp = unit.stats.hp ?? derived.maxHp;
+  const templateMaxHp = unit.stats.maxHp ?? derived.maxHp;
+  const hpRatio = templateMaxHp > 0 ? templateHp / templateMaxHp : 1;
+  const currentHp = hpRatio >= 1
+    ? derived.maxHp
+    : clamp(Math.round(derived.maxHp * hpRatio), 1, derived.maxHp);
+
+  const templateSp = unit.stats.sp ?? derived.maxSp;
+  const templateMaxSp = unit.stats.maxSp ?? derived.maxSp;
+  const spRatio = templateMaxSp > 0 ? templateSp / templateMaxSp : 1;
+  const currentSp = spRatio >= 1
+    ? derived.maxSp
+    : clamp(Math.round(derived.maxSp * spRatio), 0, derived.maxSp);
+
   const missingStatMappings: string[] = [];
   const missingRuleBindings: string[] = [];
 
